@@ -1,0 +1,41 @@
+version: "3.3"
+services:
+  nginx:
+    image: nginx:1.22
+    ports:
+      - "81:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    networks:
+      - progressme-network
+  cache:
+    image: redis:7-alpine
+    restart: always
+    ports:
+      - "6379:6379"
+    command: redis-server --save 20 1 --loglevel warning --requirepass authentication
+    volumes:
+      - redis:/data
+    networks:
+      - progressme-network
+  db:
+    image: postgres:latest
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=progressme
+    ports:
+      - "5232:5432"
+    expose:
+      - 5432
+    volumes:
+      - psql-db:/var/lib/postgresql/data
+    networks:
+      - progressme-network
+
+volumes:
+  psql-db:
+  redis:
+networks:
+  progressme-network:
