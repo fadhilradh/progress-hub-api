@@ -1,6 +1,7 @@
 package api
 
 import (
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
 )
@@ -22,6 +23,7 @@ func NewServer(redis *redis.Client) *Server {
 	}
 
 	router := gin.Default()
+	router.Use(cors.Default())
 	router.GET("/", testFunc)
 	router.POST("/progress", server.createProgress)
 
