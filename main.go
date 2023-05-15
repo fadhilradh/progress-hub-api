@@ -3,9 +3,9 @@ package main
 import (
 	"log"
 
-	"github.com/go-redis/redis"
+	"github.com/redis/go-redis/v9"
 	"progress.me-api/api"
-	"progress.me-api/db"
+	db "progress.me-api/db/redis"
 )
 
 var redisOpt = &redis.Options{

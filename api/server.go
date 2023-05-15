@@ -2,7 +2,7 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/go-redis/redis"
+	"github.com/redis/go-redis/v9"
 )
 
 type Server struct {
@@ -22,11 +22,17 @@ func NewServer(redis *redis.Client) *Server {
 	}
 
 	router := gin.Default()
-
 	router.GET("/", testFunc)
+	router.POST("/progress", server.createProgress)
 
 	server.router = router
 	return server
+}
+
+func errorResponse(err error) gin.H {
+	return gin.H{
+		"error": err.Error(),
+	}
 }
 
 func (server *Server) Start(address string) error {

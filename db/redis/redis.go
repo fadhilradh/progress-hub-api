@@ -1,7 +1,7 @@
 package db
 
 import (
-	"github.com/go-redis/redis"
+	"github.com/redis/go-redis/v9"
 )
 
 func NewRedis(opt *redis.Options) *redis.Client {
