@@ -10,6 +10,7 @@ import (
 )
 
 type ProgressData struct {
+	UserID        string `json:"userId"`
 	RangeType     string `json:"range_type"` // month, year
 	RangeValue    string `json:"range_value"`
 	ProgressName  string `json:"progress_name"`
