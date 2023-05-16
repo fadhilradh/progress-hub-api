@@ -1,9 +1,12 @@
 version: "2"
 sql:
   - engine: "postgresql"
-    queries: "db/sql/query/query.sql"
-    schema: "db/sql/schema/schema.sql"
+    queries: "./db/sql/query"
+    schema: "./db/sql/migration"
+
     gen:
       go:
         package: "db"
-        out: "db"
+        out: "./db/sql/sqlc"
+        emit_json_tags: true
+        emit_empty_slices: true

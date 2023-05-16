@@ -9,6 +9,7 @@ services:
     networks:
       - progressme-network
   cache:
+    container_name: redis
     image: redis:7-alpine
     restart: always
     ports:
@@ -18,24 +19,41 @@ services:
       - redis:/data
     networks:
       - progressme-network
-  db:
-    image: postgres:latest
-    restart: always
+  postgres:
+    container_name: postgres-13
+    image: postgres:13
+    restart: unless-stopped
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=skygazer
+      - POSTGRES_PASSWORD=hamdalah
       - POSTGRES_DB=progressme
+      - PGDATA=/data/postgres
     ports:
       - "5232:5432"
     expose:
       - 5432
     volumes:
-      - psql-db:/var/lib/postgresql/data
+      - postgres:/data/postgres
     networks:
       - progressme-network
-
+  pgadmin:
+    container_name: pgadmin4
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+    volumes:
+      - pgadmin:/var/lib/pgadmin
+    ports:
+      - "5050:80"
+    networks:
+      - progressme-network
+    restart: unless-stopped
 volumes:
-  psql-db:
+  postgres:
   redis:
+  pgadmin:
 networks:
   progressme-network:
+    driver: bridge

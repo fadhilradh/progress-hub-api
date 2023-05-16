@@ -22,7 +22,7 @@ CREATE TABLE "progress" (
   "user_id" uuid
 );
 
-CREATE TABLE "user" (
+CREATE TABLE "users" (
   "id" uuid PRIMARY KEY,
   "username" text UNIQUE NOT NULL,
   "email" text UNIQUE NOT NULL,
@@ -33,4 +33,4 @@ CREATE TABLE "user" (
   "photo_profile_url" text
 );
 
-ALTER TABLE "progress" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("id");
+ALTER TABLE "progress" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
