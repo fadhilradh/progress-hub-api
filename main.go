@@ -4,9 +4,10 @@ import (
 	"database/sql"
 	"log"
 
+	_ "github.com/lib/pq"
 	"github.com/redis/go-redis/v9"
 	"progress.me-api/api"
-	db "progress.me-api/db"
+	reddb "progress.me-api/db/redis"
 	db "progress.me-api/db/sql/sqlc"
 	"progress.me-api/util"
 )
@@ -27,10 +28,10 @@ func main() {
 		log.Fatal("Can't connect to db:", err)
 	}
 	store := db.NewStore(conn)
-	rdb := db.NewRedis(redisOpt)
+	rdb := reddb.NewRedis(redisOpt)
 	server := api.NewServer(rdb, store)
 
-	err = server.Start("http://0.0.0.0:8081")
+	err = server.Start(config.ServerAddress)
 
 	if err != nil {
 		log.Fatal("cannot start server:", err)

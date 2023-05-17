@@ -36,13 +36,16 @@ func (server *Server) createUser(ctx *gin.Context) {
 		Password: req.Password, // encrypt this !
 		Email:    req.Email,
 		CreatedAt: sql.NullTime{
-			Time: time.Now(),
+			Time:  time.Now(),
+			Valid: true,
 		},
 		UpdatedAt: sql.NullTime{
-			Time: time.Now(),
+			Time:  time.Now(),
+			Valid: true,
 		},
 		Role: db.NullRole{
-			Role: db.Role(req.Role),
+			Role:  db.Role(req.Role),
+			Valid: true,
 		},
 	}
 

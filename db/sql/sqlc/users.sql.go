@@ -8,12 +8,14 @@ package db
 import (
 	"context"
 	"database/sql"
+
+	"github.com/google/uuid"
 )
 
 const createUser = `-- name: CreateUser :one
 INSERT INTO users(username, email, password, created_at, updated_at, role)
 VALUES($1, $2, $3, $4, $5, $6)
-RETURNING username, email, role
+RETURNING id, username, email, role
 `
 
 type CreateUserParams struct {
@@ -26,9 +28,10 @@ type CreateUserParams struct {
 }
 
 type CreateUserRow struct {
-	Username string   `json:"username"`
-	Email    string   `json:"email"`
-	Role     NullRole `json:"role"`
+	ID       uuid.UUID `json:"id"`
+	Username string    `json:"username"`
+	Email    string    `json:"email"`
+	Role     NullRole  `json:"role"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (CreateUserRow, error) {
@@ -41,6 +44,11 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (CreateU
 		arg.Role,
 	)
 	var i CreateUserRow
-	err := row.Scan(&i.Username, &i.Email, &i.Role)
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Email,
+		&i.Role,
+	)
 	return i, err
 }
