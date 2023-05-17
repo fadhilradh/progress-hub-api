@@ -15,7 +15,7 @@ import (
 const createUser = `-- name: CreateUser :one
 INSERT INTO users(username, email, password, created_at, updated_at, role)
 VALUES($1, $2, $3, $4, $5, $6)
-RETURNING id, username, email, role
+RETURNING id, username, email, role, created_at, updated_at
 `
 
 type CreateUserParams struct {
@@ -28,10 +28,12 @@ type CreateUserParams struct {
 }
 
 type CreateUserRow struct {
-	ID       uuid.UUID `json:"id"`
-	Username string    `json:"username"`
-	Email    string    `json:"email"`
-	Role     NullRole  `json:"role"`
+	ID        uuid.UUID    `json:"id"`
+	Username  string       `json:"username"`
+	Email     string       `json:"email"`
+	Role      NullRole     `json:"role"`
+	CreatedAt sql.NullTime `json:"created_at"`
+	UpdatedAt sql.NullTime `json:"updated_at"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (CreateUserRow, error) {
@@ -49,6 +51,8 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (CreateU
 		&i.Username,
 		&i.Email,
 		&i.Role,
+		&i.CreatedAt,
+		&i.UpdatedAt,
 	)
 	return i, err
 }

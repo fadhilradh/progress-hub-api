@@ -56,6 +56,17 @@ func (ns NullRange) Value() (driver.Value, error) {
 	return string(ns.Range), nil
 }
 
+func (e Range) Valid() bool {
+	switch e {
+	case RangeDaily,
+		RangeWeekly,
+		RangeMonthly,
+		RangeYearly:
+		return true
+	}
+	return false
+}
+
 type Role string
 
 const (
@@ -97,6 +108,16 @@ func (ns NullRole) Value() (driver.Value, error) {
 		return nil, nil
 	}
 	return string(ns.Role), nil
+}
+
+func (e Role) Valid() bool {
+	switch e {
+	case RoleUser,
+		RoleAdmin,
+		RoleSuperadmin:
+		return true
+	}
+	return false
 }
 
 type Progress struct {
