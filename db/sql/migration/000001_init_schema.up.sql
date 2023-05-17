@@ -12,24 +12,24 @@ CREATE TYPE "role" AS ENUM (
 );
 
 CREATE TABLE "progress" (
-  "id" uuid PRIMARY KEY,
-  "progress_name" text,
-  "progress_value" bigint,
-  "range_type" range,
-  "range_value" text,
-  "created_at" timestamptz,
-  "updated_at" timestamptz,
-  "user_id" uuid
+  "id" uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+  "progress_name" text NOT NULL,
+  "progress_value" bigint NOT NULL,
+  "range_type" range NOT NULL,
+  "range_value" text NOT NULL,
+  "created_at" timestamptz NOT NULL,
+  "updated_at" timestamptz NOT NULL DEFAULT (now()),
+  "user_id" uuid NOT NULL
 );
 
 CREATE TABLE "users" (
-  "id" uuid PRIMARY KEY,
+  "id" uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
   "username" text UNIQUE NOT NULL,
   "email" text UNIQUE NOT NULL,
   "password" text NOT NULL,
-  "created_at" timestamptz,
-  "updated_at" timestamptz DEFAULT (now()),
-  "role" role,
+  "created_at" timestamptz NOT NULL,
+  "updated_at" timestamptz NOT NULL DEFAULT (now()),
+  "role" role NOT NULL,
   "photo_profile_url" text
 );
 

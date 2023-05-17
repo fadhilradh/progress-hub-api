@@ -7,7 +7,7 @@ package db
 
 import (
 	"context"
-	"database/sql"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -19,21 +19,21 @@ RETURNING id, username, email, role, created_at, updated_at
 `
 
 type CreateUserParams struct {
-	Username  string       `json:"username"`
-	Email     string       `json:"email"`
-	Password  string       `json:"password"`
-	CreatedAt sql.NullTime `json:"created_at"`
-	UpdatedAt sql.NullTime `json:"updated_at"`
-	Role      NullRole     `json:"role"`
+	Username  string    `json:"username"`
+	Email     string    `json:"email"`
+	Password  string    `json:"password"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	Role      Role      `json:"role"`
 }
 
 type CreateUserRow struct {
-	ID        uuid.UUID    `json:"id"`
-	Username  string       `json:"username"`
-	Email     string       `json:"email"`
-	Role      NullRole     `json:"role"`
-	CreatedAt sql.NullTime `json:"created_at"`
-	UpdatedAt sql.NullTime `json:"updated_at"`
+	ID        uuid.UUID `json:"id"`
+	Username  string    `json:"username"`
+	Email     string    `json:"email"`
+	Role      Role      `json:"role"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (CreateUserRow, error) {

@@ -7,7 +7,6 @@ package db
 
 import (
 	"context"
-	"database/sql"
 
 	"github.com/google/uuid"
 )
@@ -32,11 +31,11 @@ VALUES(
 `
 
 type CreateProgressParams struct {
-	UserID        uuid.NullUUID  `json:"user_id"`
-	RangeType     NullRange      `json:"range_type"`
-	RangeValue    sql.NullString `json:"range_value"`
-	ProgressName  sql.NullString `json:"progress_name"`
-	ProgressValue sql.NullInt64  `json:"progress_value"`
+	UserID        uuid.UUID `json:"user_id"`
+	RangeType     Range     `json:"range_type"`
+	RangeValue    string    `json:"range_value"`
+	ProgressName  string    `json:"progress_name"`
+	ProgressValue int64     `json:"progress_value"`
 }
 
 func (q *Queries) CreateProgress(ctx context.Context, arg CreateProgressParams) (Progress, error) {

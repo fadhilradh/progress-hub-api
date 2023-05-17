@@ -28,7 +28,8 @@ func NewServer(redis *redis.Client, store *db.Store) *Server {
 	router := gin.Default()
 	router.Use(cors.Default())
 	router.GET("/", testFunc)
-	router.POST("/progress", server.createProgress)
+	router.POST("/progress", server.CreateProgress)
+	router.POST("/cache/progress", server.CacheProgress)
 	router.POST("/users", server.createUser)
 
 	server.router = router
@@ -42,5 +43,5 @@ func errorResponse(err error) gin.H {
 }
 
 func (server *Server) Start(address string) error {
-	return server.router.Run()
+	return server.router.Run(address)
 }

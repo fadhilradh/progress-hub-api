@@ -8,6 +8,7 @@ import (
 	"database/sql"
 	"database/sql/driver"
 	"fmt"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -121,14 +122,14 @@ func (e Role) Valid() bool {
 }
 
 type Progress struct {
-	ID            uuid.UUID      `json:"id"`
-	ProgressName  sql.NullString `json:"progress_name"`
-	ProgressValue sql.NullInt64  `json:"progress_value"`
-	RangeType     NullRange      `json:"range_type"`
-	RangeValue    sql.NullString `json:"range_value"`
-	CreatedAt     sql.NullTime   `json:"created_at"`
-	UpdatedAt     sql.NullTime   `json:"updated_at"`
-	UserID        uuid.NullUUID  `json:"user_id"`
+	ID            uuid.UUID `json:"id"`
+	ProgressName  string    `json:"progress_name"`
+	ProgressValue int64     `json:"progress_value"`
+	RangeType     Range     `json:"range_type"`
+	RangeValue    string    `json:"range_value"`
+	CreatedAt     time.Time `json:"created_at"`
+	UpdatedAt     time.Time `json:"updated_at"`
+	UserID        uuid.UUID `json:"user_id"`
 }
 
 type User struct {
@@ -136,8 +137,8 @@ type User struct {
 	Username        string         `json:"username"`
 	Email           string         `json:"email"`
 	Password        string         `json:"password"`
-	CreatedAt       sql.NullTime   `json:"created_at"`
-	UpdatedAt       sql.NullTime   `json:"updated_at"`
-	Role            NullRole       `json:"role"`
+	CreatedAt       time.Time      `json:"created_at"`
+	UpdatedAt       time.Time      `json:"updated_at"`
+	Role            Role           `json:"role"`
 	PhotoProfileUrl sql.NullString `json:"photo_profile_url"`
 }
