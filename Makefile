@@ -11,6 +11,6 @@ migratedown:
 makeFileDir := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
 sqlc:
-	docker run --rm -v $(makeFileDir):/src -w /src kjconroy/sqlc generate
+	sudo docker run --rm -v $(makeFileDir):/src -w /src kjconroy/sqlc generate
 
 .PHONY: postgres createdb dropdb migrateup migratedown sqlc

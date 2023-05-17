@@ -4,11 +4,13 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
+	db "progress.me-api/db/sql/sqlc"
 )
 
 type Server struct {
 	redis  *redis.Client
 	router *gin.Engine
+	store  *db.Store
 }
 
 func testFunc(ctx *gin.Context) {
@@ -17,15 +19,17 @@ func testFunc(ctx *gin.Context) {
 	})
 }
 
-func NewServer(redis *redis.Client) *Server {
+func NewServer(redis *redis.Client, store *db.Store) *Server {
 	server := &Server{
 		redis: redis,
+		store: store,
 	}
 
 	router := gin.Default()
 	router.Use(cors.Default())
 	router.GET("/", testFunc)
 	router.POST("/progress", server.createProgress)
+	router.POST("/users", server.createUser)
 
 	server.router = router
 	return server
