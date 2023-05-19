@@ -7,6 +7,7 @@ package db
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -44,4 +45,53 @@ func (q *Queries) CreateChart(ctx context.Context, arg CreateChartParams) (Chart
 		&i.ProgressName,
 	)
 	return i, err
+}
+
+const getChartProgressByUserId = `-- name: GetChartProgressByUserId :many
+SELECT c.id AS chart_id, p.id as progress_id, c.range_type, p.range_value, c.progress_name, p.progress_value,  
+p.updated_at AS progress_updated_at
+FROM charts c
+INNER JOIN progress p ON c.id = p.chart_id 
+WHERE c.user_id = $1
+`
+
+type GetChartProgressByUserIdRow struct {
+	ChartID           uuid.UUID `json:"chart_id"`
+	ProgressID        uuid.UUID `json:"progress_id"`
+	RangeType         Range     `json:"range_type"`
+	RangeValue        string    `json:"range_value"`
+	ProgressName      string    `json:"progress_name"`
+	ProgressValue     int64     `json:"progress_value"`
+	ProgressUpdatedAt time.Time `json:"progress_updated_at"`
+}
+
+func (q *Queries) GetChartProgressByUserId(ctx context.Context, userID uuid.NullUUID) ([]GetChartProgressByUserIdRow, error) {
+	rows, err := q.db.QueryContext(ctx, getChartProgressByUserId, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetChartProgressByUserIdRow{}
+	for rows.Next() {
+		var i GetChartProgressByUserIdRow
+		if err := rows.Scan(
+			&i.ChartID,
+			&i.ProgressID,
+			&i.RangeType,
+			&i.RangeValue,
+			&i.ProgressName,
+			&i.ProgressValue,
+			&i.ProgressUpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }

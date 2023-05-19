@@ -26,11 +26,17 @@ func NewServer(redis *redis.Client, store *db.Store) *Server {
 	}
 
 	router := gin.Default()
+	// router.Group("/api/v1")
+	// router.BasePath()
 	router.Use(cors.Default())
 	router.GET("/", testFunc)
 	router.POST("/chart-progresses", server.CreateChartWithProgresses)
+	router.GET("/chart-progresses/:id", server.GetChartProgressByUserId)
+
 	router.POST("/cache/progress", server.CacheProgress)
 	router.POST("/users", server.createUser)
+
+	router.POST("/login", server.LoginUser)
 
 	server.router = router
 	return server
