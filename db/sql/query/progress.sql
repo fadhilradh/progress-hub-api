@@ -1,4 +1,4 @@
--- name: CreateProgress :one
+-- name: CreateProgress :exec
 INSERT INTO progress(
     chart_id, 
     range_value, 

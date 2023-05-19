@@ -1,9 +1,6 @@
 package api
 
 import (
-	"context"
-	"encoding/json"
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -11,73 +8,71 @@ import (
 	db "progress.me-api/db/sql/sqlc"
 )
 
-type CreateProgressReq struct {
-	ChartID       uuid.UUID `json:"chart_id"`
-	RangeValue    string    `json:"range_value"`
-	ProgressValue int64     `json:"progress_value"`
+type Progress struct {
+	RangeValue    string `json:"range_value"`
+	ProgressValue int64  `json:"progress_value"`
 }
 
-type CacheProgressReq struct {
-	ID   string        `json:"id"`
-	Data []db.Progress `json:"data"`
+type CreateChartWithProgressesReq struct {
+	UserId       uuid.UUID  `json:"user_id"`
+	ProgressName string     `json:"progress_name"`
+	RangeType    string     `json:"range_type"`
+	ProgressData []Progress `json:"progress_data"`
 }
 
-func (i CacheProgressReq) MarshalBinary() ([]byte, error) {
-	return json.Marshal(i)
+type CreateChartWithProgressesRes struct {
+	ChartID      uuid.UUID  `json:"chart_id"`
+	UserID       uuid.UUID  `json:"user_id"`
+	ProgressData []Progress `json:"progress_data"`
 }
 
-func (server *Server) CreateProgress(ctx *gin.Context) {
-	var req CreateProgressReq
+func (server *Server) CreateChartWithProgresses(ctx *gin.Context) {
+	var req CreateChartWithProgressesReq
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
 
-	data := db.CreateProgressParams{
-		ChartID: uuid.NullUUID{
-			UUID:  req.ChartID,
+	// insert into chart table
+	chartData := db.CreateChartParams{
+		UserID: uuid.NullUUID{
+			UUID:  req.UserId,
 			Valid: true,
 		},
-		RangeValue:    req.RangeValue,
-		ProgressValue: req.ProgressValue,
+		RangeType:    db.Range(req.RangeType),
+		ProgressName: req.ProgressName,
 	}
-
-	progress, err := server.store.CreateProgress(ctx, data)
+	chart, err := server.store.CreateChart(ctx, chartData)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
+	// insert into progress table using chart ID from above result
+	var ProgressData []Progress
+	for _, prog := range req.ProgressData {
+		data := db.CreateProgressParams{
+			ChartID: uuid.NullUUID{
+				UUID:  chart.ID,
+				Valid: true,
+			},
+			RangeValue:    prog.RangeValue,
+			ProgressValue: prog.ProgressValue,
+		}
 
-	ctx.JSON(http.StatusOK, progress)
-}
-
-func (server *Server) CacheProgress(ctx *gin.Context) {
-	var req CacheProgressReq
-	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
-		return
-	}
-	var c = context.Background()
-
-	err := server.redis.Set(c, req.ID, req, 0).Err()
-	if err != nil {
-		log.Print(err)
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
-		return
+		progress, err := server.store.CreateProgress(ctx, data)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+			return
+		}
+		ProgressData = append(ProgressData, Progress{
+			RangeValue:    progress.RangeValue,
+			ProgressValue: progress.ProgressValue,
+		})
 	}
 
-	val, err := server.redis.Get(c, req.ID).Result()
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
-		log.Print(err)
-		return
-	}
-	var raw CacheProgressReq
-	if err := json.Unmarshal([]byte(val), &raw); err != nil {
-		panic(err)
-	}
-	if err != nil {
-		panic(err)
-	}
-	ctx.JSON(http.StatusOK, raw)
+	ctx.JSON(http.StatusOK, CreateChartWithProgressesRes{
+		ChartID:      chart.ID,
+		UserID:       chart.UserID.UUID,
+		ProgressData: ProgressData,
+	})
 }
