@@ -12,10 +12,8 @@ import (
 )
 
 type CreateProgressReq struct {
-	UserID        uuid.UUID `json:"user_id"`
-	RangeType     db.Range  `json:"range_type"`
+	ChartID       uuid.UUID `json:"chart_id"`
 	RangeValue    string    `json:"range_value"`
-	ProgressName  string    `json:"progress_name"`
 	ProgressValue int64     `json:"progress_value"`
 }
 
@@ -36,10 +34,11 @@ func (server *Server) CreateProgress(ctx *gin.Context) {
 	}
 
 	data := db.CreateProgressParams{
-		UserID:        req.UserID,
-		RangeType:     req.RangeType,
+		ChartID: uuid.NullUUID{
+			UUID:  req.ChartID,
+			Valid: true,
+		},
 		RangeValue:    req.RangeValue,
-		ProgressName:  req.ProgressName,
 		ProgressValue: req.ProgressValue,
 	}
 

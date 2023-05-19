@@ -1,6 +1,7 @@
 package api
 
 import (
+	"database/sql"
 	"net/http"
 	"time"
 
@@ -31,10 +32,13 @@ func (server *Server) createUser(ctx *gin.Context) {
 	}
 
 	data := db.CreateUserParams{
-		Username:  req.Username,
-		Password:  req.Password, // encrypt this !
-		Email:     req.Email,
-		CreatedAt: time.Now(),
+		Username: req.Username,
+		Password: req.Password, // encrypt this !
+		Email:    req.Email,
+		CreatedAt: sql.NullTime{
+			Time:  time.Now(),
+			Valid: true,
+		},
 		UpdatedAt: time.Now(),
 		Role:      db.Role(req.Role),
 	}

@@ -13,10 +13,8 @@ import (
 
 const createProgress = `-- name: CreateProgress :one
 INSERT INTO progress(
-    user_id, 
-    range_type, 
+    chart_id, 
     range_value, 
-    progress_name, 
     progress_value, 
     created_at
 )
@@ -24,38 +22,26 @@ VALUES(
     $1, 
     $2, 
     $3,
-    $4,
-    $5,
     now()
-) RETURNING id, progress_name, progress_value, range_type, range_value, created_at, updated_at, user_id
+) RETURNING id, chart_id, progress_value, range_value, created_at, updated_at
 `
 
 type CreateProgressParams struct {
-	UserID        uuid.UUID `json:"user_id"`
-	RangeType     Range     `json:"range_type"`
-	RangeValue    string    `json:"range_value"`
-	ProgressName  string    `json:"progress_name"`
-	ProgressValue int64     `json:"progress_value"`
+	ChartID       uuid.NullUUID `json:"chart_id"`
+	RangeValue    string        `json:"range_value"`
+	ProgressValue int64         `json:"progress_value"`
 }
 
 func (q *Queries) CreateProgress(ctx context.Context, arg CreateProgressParams) (Progress, error) {
-	row := q.db.QueryRowContext(ctx, createProgress,
-		arg.UserID,
-		arg.RangeType,
-		arg.RangeValue,
-		arg.ProgressName,
-		arg.ProgressValue,
-	)
+	row := q.db.QueryRowContext(ctx, createProgress, arg.ChartID, arg.RangeValue, arg.ProgressValue)
 	var i Progress
 	err := row.Scan(
 		&i.ID,
-		&i.ProgressName,
+		&i.ChartID,
 		&i.ProgressValue,
-		&i.RangeType,
 		&i.RangeValue,
 		&i.CreatedAt,
 		&i.UpdatedAt,
-		&i.UserID,
 	)
 	return i, err
 }

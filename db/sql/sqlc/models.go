@@ -121,15 +121,22 @@ func (e Role) Valid() bool {
 	return false
 }
 
+type Chart struct {
+	ID           uuid.UUID     `json:"id"`
+	UserID       uuid.NullUUID `json:"user_id"`
+	CreatedAt    sql.NullTime  `json:"created_at"`
+	UpdatedAt    time.Time     `json:"updated_at"`
+	RangeType    Range         `json:"range_type"`
+	ProgressName string        `json:"progress_name"`
+}
+
 type Progress struct {
-	ID            uuid.UUID `json:"id"`
-	ProgressName  string    `json:"progress_name"`
-	ProgressValue int64     `json:"progress_value"`
-	RangeType     Range     `json:"range_type"`
-	RangeValue    string    `json:"range_value"`
-	CreatedAt     time.Time `json:"created_at"`
-	UpdatedAt     time.Time `json:"updated_at"`
-	UserID        uuid.UUID `json:"user_id"`
+	ID            uuid.UUID     `json:"id"`
+	ChartID       uuid.NullUUID `json:"chart_id"`
+	ProgressValue int64         `json:"progress_value"`
+	RangeValue    string        `json:"range_value"`
+	CreatedAt     sql.NullTime  `json:"created_at"`
+	UpdatedAt     time.Time     `json:"updated_at"`
 }
 
 type User struct {
@@ -137,7 +144,7 @@ type User struct {
 	Username        string         `json:"username"`
 	Email           string         `json:"email"`
 	Password        string         `json:"password"`
-	CreatedAt       time.Time      `json:"created_at"`
+	CreatedAt       sql.NullTime   `json:"created_at"`
 	UpdatedAt       time.Time      `json:"updated_at"`
 	Role            Role           `json:"role"`
 	PhotoProfileUrl sql.NullString `json:"photo_profile_url"`
