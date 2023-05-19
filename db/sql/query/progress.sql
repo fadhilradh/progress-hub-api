@@ -11,3 +11,6 @@ VALUES(
     $3,
     now()
 ) RETURNING *;
+
+-- name: GetProgressByChartID :many
+SELECT * FROM progress WHERE chart_id = $1;

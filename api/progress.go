@@ -22,9 +22,9 @@ type CreateChartWithProgressesReq struct {
 }
 
 type CreateChartWithProgressesRes struct {
-	ChartID      uuid.UUID  `json:"chart_id"`
-	UserID       uuid.UUID  `json:"user_id"`
-	ProgressData []Progress `json:"progress_data"`
+	ChartID      uuid.UUID     `json:"chart_id"`
+	UserID       uuid.UUID     `json:"user_id"`
+	ProgressData []db.Progress `json:"progress_data"`
 }
 
 func (server *Server) CreateChartWithProgresses(ctx *gin.Context) {
@@ -50,7 +50,6 @@ func (server *Server) CreateChartWithProgresses(ctx *gin.Context) {
 		return
 	}
 	// insert into progress table using chart ID from above result
-	var ProgressData []Progress
 	for _, prog := range req.ProgressData {
 		data := db.CreateProgressParams{
 			ChartID: uuid.NullUUID{
@@ -61,20 +60,24 @@ func (server *Server) CreateChartWithProgresses(ctx *gin.Context) {
 			ProgressValue: prog.ProgressValue,
 		}
 
-		progress, err := server.store.CreateProgress(ctx, data)
+		err := server.store.CreateProgress(ctx, data)
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 			return
 		}
-		ProgressData = append(ProgressData, Progress{
-			RangeValue:    progress.RangeValue,
-			ProgressValue: progress.ProgressValue,
-		})
+	}
+
+	// get all progresses from progress table using chart ID from above result
+	progresses, err := server.store.GetProgressByChartID(ctx, uuid.NullUUID{UUID: chart.ID, Valid: true})
+	if err != nil {
+		log.Print(err)
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
 	}
 
 	ctx.JSON(http.StatusOK, CreateChartWithProgressesRes{
 		ChartID:      chart.ID,
 		UserID:       chart.UserID.UUID,
-		ProgressData: ProgressData,
+		ProgressData: progresses,
 	})
 }

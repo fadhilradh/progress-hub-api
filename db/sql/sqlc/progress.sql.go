@@ -11,7 +11,7 @@ import (
 	"github.com/google/uuid"
 )
 
-const createProgress = `-- name: CreateProgress :one
+const createProgress = `-- name: CreateProgress :exec
 INSERT INTO progress(
     chart_id, 
     range_value, 
@@ -32,16 +32,41 @@ type CreateProgressParams struct {
 	ProgressValue int64         `json:"progress_value"`
 }
 
-func (q *Queries) CreateProgress(ctx context.Context, arg CreateProgressParams) (Progress, error) {
-	row := q.db.QueryRowContext(ctx, createProgress, arg.ChartID, arg.RangeValue, arg.ProgressValue)
-	var i Progress
-	err := row.Scan(
-		&i.ID,
-		&i.ChartID,
-		&i.ProgressValue,
-		&i.RangeValue,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
+func (q *Queries) CreateProgress(ctx context.Context, arg CreateProgressParams) error {
+	_, err := q.db.ExecContext(ctx, createProgress, arg.ChartID, arg.RangeValue, arg.ProgressValue)
+	return err
+}
+
+const getProgressByChartID = `-- name: GetProgressByChartID :many
+SELECT id, chart_id, progress_value, range_value, created_at, updated_at FROM progress WHERE chart_id = $1
+`
+
+func (q *Queries) GetProgressByChartID(ctx context.Context, chartID uuid.NullUUID) ([]Progress, error) {
+	rows, err := q.db.QueryContext(ctx, getProgressByChartID, chartID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Progress{}
+	for rows.Next() {
+		var i Progress
+		if err := rows.Scan(
+			&i.ID,
+			&i.ChartID,
+			&i.ProgressValue,
+			&i.RangeValue,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
