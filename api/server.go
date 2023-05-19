@@ -28,7 +28,7 @@ func NewServer(redis *redis.Client, store *db.Store) *Server {
 	router := gin.Default()
 	router.Use(cors.Default())
 	router.GET("/", testFunc)
-	router.POST("/chart", server.CreateChartWithProgresses)
+	router.POST("/chart-progresses", server.CreateChartWithProgresses)
 	router.POST("/cache/progress", server.CacheProgress)
 	router.POST("/users", server.createUser)
 

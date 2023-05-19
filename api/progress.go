@@ -1,6 +1,7 @@
 package api
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -44,6 +45,7 @@ func (server *Server) CreateChartWithProgresses(ctx *gin.Context) {
 	}
 	chart, err := server.store.CreateChart(ctx, chartData)
 	if err != nil {
+		log.Print(err)
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
