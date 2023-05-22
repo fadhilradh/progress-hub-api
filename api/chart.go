@@ -2,7 +2,6 @@ package api
 
 import (
 	"database/sql"
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -14,6 +13,19 @@ type CreateChartReq struct {
 	UserID       uuid.UUID `json:"user_id"`
 	RangeType    string    `json:"range_type"`
 	ProgressName string    `json:"progress_name"`
+}
+
+type ProgressData struct {
+	ProgressID    uuid.UUID `json:"progress_id"`
+	RangeValue    string    `json:"range_value"`
+	ProgressValue int64     `json:"progress_value"`
+}
+
+type GetChartsByUserIdRes struct {
+	ChartID      uuid.UUID      `json:"chart_id"`
+	RangeType    db.Range       `json:"range_type"`
+	ProgressName string         `json:"progress_name"`
+	ProgressData []ProgressData `json:"progress_data"`
 }
 
 func (server *Server) CreateChart(ctx *gin.Context) db.Chart {
@@ -50,8 +62,7 @@ func (server *Server) GetChartProgressByUserId(ctx *gin.Context) {
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 	}
-	log.Print(userID)
-	chart, err := server.store.GetChartProgressByUserId(ctx, uuid.NullUUID{
+	charts, err := server.store.GetChartProgressByUserId(ctx, uuid.NullUUID{
 		UUID:  userID,
 		Valid: true,
 	})
@@ -63,5 +74,38 @@ func (server *Server) GetChartProgressByUserId(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
-	ctx.JSON(http.StatusOK, chart)
+	var chartRes []GetChartsByUserIdRes
+	currChartID := charts[0].ChartID
+	currChartIdx := 0
+	// Iterate over charts : Make one object for each chartID
+	for i, ch := range charts {
+		// if the first index or
+		// if the chartID is different from the previous one, create new chart object
+		if i == 0 || ch.ChartID != currChartID {
+			chartRes = append(chartRes, GetChartsByUserIdRes{
+				ChartID:      ch.ChartID,
+				RangeType:    ch.RangeType,
+				ProgressName: ch.ProgressName,
+			})
+			currChartID = ch.ChartID
+			if i != 0 {
+				currChartIdx++
+			}
+			chartRes[currChartIdx].ProgressData = append(chartRes[currChartIdx].ProgressData, ProgressData{
+				ProgressID:    ch.ProgressID,
+				RangeValue:    ch.RangeValue,
+				ProgressValue: ch.ProgressValue,
+			})
+
+		} else {
+			chartRes[currChartIdx].ProgressData = append(chartRes[currChartIdx].ProgressData, ProgressData{
+				ProgressID:    ch.ProgressID,
+				RangeValue:    ch.RangeValue,
+				ProgressValue: ch.ProgressValue,
+			})
+		}
+
+	}
+
+	ctx.JSON(http.StatusOK, chartRes)
 }
