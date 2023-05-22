@@ -7,7 +7,6 @@ migrateup:
 migratedown:
 	migrate -path db/sql/migration -database "postgresql://skygazer:hamdalah@172.26.176.1:5232/progressme?sslmode=disable" -verbose down
 
-
 makeFileDir := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
 sqlc:

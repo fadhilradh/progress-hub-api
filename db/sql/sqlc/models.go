@@ -128,6 +128,7 @@ type Chart struct {
 	UpdatedAt    time.Time     `json:"updated_at"`
 	RangeType    Range         `json:"range_type"`
 	ProgressName string        `json:"progress_name"`
+	Colors       string        `json:"colors"`
 }
 
 type Progress struct {

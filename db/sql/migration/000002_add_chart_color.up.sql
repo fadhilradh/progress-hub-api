@@ -1,0 +1,1 @@
+ALTER TABLE charts ADD COLUMN colors TEXT NOT NULL DEFAULT 'blue';

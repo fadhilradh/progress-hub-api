@@ -17,24 +17,32 @@ INSERT INTO charts(
     user_id, 
     range_type, 
     progress_name, 
-    created_at
+    created_at,
+    colors
 )
 VALUES(
     $1, 
     $2, 
     $3,
-    now()
-) RETURNING id, user_id, created_at, updated_at, range_type, progress_name
+    now(),
+    $4
+) RETURNING id, user_id, created_at, updated_at, range_type, progress_name, colors
 `
 
 type CreateChartParams struct {
 	UserID       uuid.NullUUID `json:"user_id"`
 	RangeType    Range         `json:"range_type"`
 	ProgressName string        `json:"progress_name"`
+	Colors       string        `json:"colors"`
 }
 
 func (q *Queries) CreateChart(ctx context.Context, arg CreateChartParams) (Chart, error) {
-	row := q.db.QueryRowContext(ctx, createChart, arg.UserID, arg.RangeType, arg.ProgressName)
+	row := q.db.QueryRowContext(ctx, createChart,
+		arg.UserID,
+		arg.RangeType,
+		arg.ProgressName,
+		arg.Colors,
+	)
 	var i Chart
 	err := row.Scan(
 		&i.ID,
@@ -43,13 +51,14 @@ func (q *Queries) CreateChart(ctx context.Context, arg CreateChartParams) (Chart
 		&i.UpdatedAt,
 		&i.RangeType,
 		&i.ProgressName,
+		&i.Colors,
 	)
 	return i, err
 }
 
 const getChartProgressByUserId = `-- name: GetChartProgressByUserId :many
-SELECT c.id AS chart_id, p.id as progress_id, c.range_type, p.range_value, c.progress_name, p.progress_value,  
-p.updated_at AS progress_updated_at
+SELECT c.id as chart_id, c.colors as chart_color, p.id as progress_id, c.range_type, p.range_value, c.progress_name, p.progress_value,  
+p.updated_at as progress_updated_at
 FROM charts c
 INNER JOIN progress p ON c.id = p.chart_id 
 WHERE c.user_id = $1
@@ -58,6 +67,7 @@ ORDER BY chart_id DESC
 
 type GetChartProgressByUserIdRow struct {
 	ChartID           uuid.UUID `json:"chart_id"`
+	ChartColor        string    `json:"chart_color"`
 	ProgressID        uuid.UUID `json:"progress_id"`
 	RangeType         Range     `json:"range_type"`
 	RangeValue        string    `json:"range_value"`
@@ -77,6 +87,7 @@ func (q *Queries) GetChartProgressByUserId(ctx context.Context, userID uuid.Null
 		var i GetChartProgressByUserIdRow
 		if err := rows.Scan(
 			&i.ChartID,
+			&i.ChartColor,
 			&i.ProgressID,
 			&i.RangeType,
 			&i.RangeValue,
