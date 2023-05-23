@@ -138,6 +138,7 @@ type Progress struct {
 	RangeValue    string        `json:"range_value"`
 	CreatedAt     sql.NullTime  `json:"created_at"`
 	UpdatedAt     time.Time     `json:"updated_at"`
+	ProgressNo    int32         `json:"progress_no"`
 }
 
 type User struct {

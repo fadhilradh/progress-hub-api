@@ -16,29 +16,37 @@ INSERT INTO progress(
     chart_id, 
     range_value, 
     progress_value, 
-    created_at
+    created_at,
+    progress_no
 )
 VALUES(
     $1, 
     $2, 
     $3,
-    now()
-) RETURNING id, chart_id, progress_value, range_value, created_at, updated_at
+    now(),
+    $4
+) RETURNING id, chart_id, progress_value, range_value, created_at, updated_at, progress_no
 `
 
 type CreateProgressParams struct {
 	ChartID       uuid.NullUUID `json:"chart_id"`
 	RangeValue    string        `json:"range_value"`
 	ProgressValue int64         `json:"progress_value"`
+	ProgressNo    int32         `json:"progress_no"`
 }
 
 func (q *Queries) CreateProgress(ctx context.Context, arg CreateProgressParams) error {
-	_, err := q.db.ExecContext(ctx, createProgress, arg.ChartID, arg.RangeValue, arg.ProgressValue)
+	_, err := q.db.ExecContext(ctx, createProgress,
+		arg.ChartID,
+		arg.RangeValue,
+		arg.ProgressValue,
+		arg.ProgressNo,
+	)
 	return err
 }
 
 const getProgressByChartID = `-- name: GetProgressByChartID :many
-SELECT id, chart_id, progress_value, range_value, created_at, updated_at FROM progress WHERE chart_id = $1
+SELECT id, chart_id, progress_value, range_value, created_at, updated_at, progress_no FROM progress WHERE chart_id = $1
 `
 
 func (q *Queries) GetProgressByChartID(ctx context.Context, chartID uuid.NullUUID) ([]Progress, error) {
@@ -57,6 +65,7 @@ func (q *Queries) GetProgressByChartID(ctx context.Context, chartID uuid.NullUUI
 			&i.RangeValue,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.ProgressNo,
 		); err != nil {
 			return nil, err
 		}

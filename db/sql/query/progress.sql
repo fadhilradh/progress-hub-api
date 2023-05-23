@@ -3,13 +3,15 @@ INSERT INTO progress(
     chart_id, 
     range_value, 
     progress_value, 
-    created_at
+    created_at,
+    progress_no
 )
 VALUES(
     $1, 
     $2, 
     $3,
-    now()
+    now(),
+    $4
 ) RETURNING *;
 
 -- name: GetProgressByChartID :many
