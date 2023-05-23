@@ -122,13 +122,15 @@ func (e Role) Valid() bool {
 }
 
 type Chart struct {
-	ID           uuid.UUID     `json:"id"`
-	UserID       uuid.NullUUID `json:"user_id"`
-	CreatedAt    sql.NullTime  `json:"created_at"`
-	UpdatedAt    time.Time     `json:"updated_at"`
-	RangeType    Range         `json:"range_type"`
-	ProgressName string        `json:"progress_name"`
-	Colors       string        `json:"colors"`
+	ID           uuid.UUID      `json:"id"`
+	UserID       uuid.NullUUID  `json:"user_id"`
+	CreatedAt    sql.NullTime   `json:"created_at"`
+	UpdatedAt    time.Time      `json:"updated_at"`
+	RangeType    Range          `json:"range_type"`
+	ProgressName string         `json:"progress_name"`
+	Colors       string         `json:"colors"`
+	ChartType    string         `json:"chart_type"`
+	BarChartType sql.NullString `json:"bar_chart_type"`
 }
 
 type Progress struct {

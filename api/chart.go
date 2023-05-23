@@ -10,86 +10,20 @@ import (
 	db "progress.me-api/db/sql/sqlc"
 )
 
-type CreateChartReq struct {
-	UserID       uuid.UUID `json:"user_id"`
-	RangeType    string    `json:"range_type"`
-	ProgressName string    `json:"progress_name"`
-	ChartColor   string    `json:"chart_color"`
-}
+type ChartType string
 
-type ProgressData struct {
-	ProgressID    uuid.UUID `json:"progress_id"`
-	RangeValue    string    `json:"range_value"`
-	ProgressValue int64     `json:"progress_value"`
-	ProgressNo    int32     `json:"progress_no"`
-}
+const (
+	ChartBar  ChartType = "bar"
+	ChartArea ChartType = "area"
+	ChartLine ChartType = "line"
+)
 
-type GetChartsByUserIdRes struct {
-	ChartID      uuid.UUID      `json:"chart_id"`
-	ChartColor   string         `json:"chart_color"`
-	RangeType    db.Range       `json:"range_type"`
-	ProgressName string         `json:"progress_name"`
-	ProgressData []ProgressData `json:"progress_data"`
-}
+type BarChartType string
 
-type GetAccountByIDReq struct {
-	ID uuid.UUID `uri:"id" binding:"required,min=1"`
-}
-
-func (server *Server) GetChartProgressByUserId(ctx *gin.Context) {
-	userID, err := uuid.Parse(ctx.Param("id"))
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
-	}
-	charts, err := server.store.GetChartProgressByUserId(ctx, uuid.NullUUID{
-		UUID:  userID,
-		Valid: true,
-	})
-	if err != nil {
-		if err == sql.ErrNoRows {
-			ctx.JSON(http.StatusNotFound, errorResponse(err))
-			return
-		}
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
-		return
-	}
-	var chartRes []GetChartsByUserIdRes
-	currChartID := charts[0].ChartID
-	currChartIdx := 0
-	// Iterate over charts : Make one object for each chartID
-	for i, ch := range charts {
-		// if the first index or
-		// if the chartID is different from the previous one, create new chart object
-		if i == 0 || ch.ChartID != currChartID {
-			chartRes = append(chartRes, GetChartsByUserIdRes{
-				ChartID:      ch.ChartID,
-				ChartColor:   ch.ChartColor,
-				RangeType:    ch.RangeType,
-				ProgressName: ch.ProgressName,
-			})
-			currChartID = ch.ChartID
-			if i != 0 {
-				currChartIdx++
-			}
-			chartRes[currChartIdx].ProgressData = append(chartRes[currChartIdx].ProgressData, ProgressData{
-				ProgressID:    ch.ProgressID,
-				RangeValue:    ch.RangeValue,
-				ProgressValue: ch.ProgressValue,
-				ProgressNo:    ch.ProgressNo,
-			})
-
-		} else {
-			chartRes[currChartIdx].ProgressData = append(chartRes[currChartIdx].ProgressData, ProgressData{
-				ProgressID:    ch.ProgressID,
-				RangeValue:    ch.RangeValue,
-				ProgressValue: ch.ProgressValue,
-			})
-		}
-
-	}
-
-	ctx.JSON(http.StatusOK, chartRes)
-}
+const (
+	Horizontal BarChartType = "horizontal"
+	Vertical   BarChartType = "vertical"
+)
 
 type Progress struct {
 	RangeValue    string `json:"range_value"`
@@ -98,11 +32,13 @@ type Progress struct {
 }
 
 type CreateChartWithProgressesReq struct {
-	UserId       uuid.UUID  `json:"user_id"`
-	ProgressName string     `json:"progress_name"`
-	RangeType    string     `json:"range_type"`
-	ProgressData []Progress `json:"progress_data"`
-	ChartColor   string     `json:"chart_color"`
+	UserId       uuid.UUID    `json:"user_id", binding:"required"`
+	ProgressName string       `json:"progress_name", binding:"required"`
+	RangeType    string       `json:"range_type", binding:"required"`
+	ProgressData []Progress   `json:"progress_data", binding:"required"`
+	ChartColor   string       `json:"chart_color", binding:"required"`
+	ChartType    ChartType    `json:"chart_type", binding:"required"`
+	BarChartType BarChartType `json:"bar_chart_type"`
 }
 
 type CreateChartWithProgressesRes struct {
@@ -127,6 +63,11 @@ func (server *Server) CreateChartWithProgresses(ctx *gin.Context) {
 		RangeType:    db.Range(req.RangeType),
 		ProgressName: req.ProgressName,
 		Colors:       req.ChartColor,
+		ChartType:    string(req.BarChartType),
+		BarChartType: sql.NullString{
+			String: string(req.BarChartType),
+			Valid:  true,
+		},
 	}
 	chart, err := server.store.CreateChart(ctx, chartData)
 	if err != nil {
@@ -166,4 +107,83 @@ func (server *Server) CreateChartWithProgresses(ctx *gin.Context) {
 		UserID:       chart.UserID.UUID,
 		ProgressData: progresses,
 	})
+}
+
+type ProgressData struct {
+	ProgressID    uuid.UUID `json:"progress_id"`
+	RangeValue    string    `json:"range_value"`
+	ProgressValue int64     `json:"progress_value"`
+	ProgressNo    int32     `json:"progress_no"`
+}
+
+type GetChartsByUserIdRes struct {
+	ChartID      uuid.UUID      `json:"chart_id"`
+	ChartColor   string         `json:"chart_color"`
+	ChartType    ChartType      `json:"chart_type"`
+	BarChartType BarChartType   `json:"bar_chart_type"`
+	RangeType    db.Range       `json:"range_type"`
+	ProgressName string         `json:"progress_name"`
+	ProgressData []ProgressData `json:"progress_data"`
+}
+
+type GetAccountByIDReq struct {
+	ID uuid.UUID `uri:"id" binding:"required,min=1"`
+}
+
+func (server *Server) GetChartProgressByUserId(ctx *gin.Context) {
+	userID, err := uuid.Parse(ctx.Param("id"))
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+	}
+	charts, err := server.store.GetChartProgressByUserId(ctx, uuid.NullUUID{
+		UUID:  userID,
+		Valid: true,
+	})
+	if err != nil {
+		if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusNotFound, errorResponse(err))
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+	var chartRes []GetChartsByUserIdRes
+	currChartID := charts[0].ChartID
+	currChartIdx := 0
+	// Iterate over charts : Make one object for each chartID
+	for i, ch := range charts {
+		// if the first index or
+		// if the chartID is different from the previous one, create new chart object
+		if i == 0 || ch.ChartID != currChartID {
+			chartRes = append(chartRes, GetChartsByUserIdRes{
+				ChartID:      ch.ChartID,
+				ChartColor:   ch.ChartColor,
+				RangeType:    ch.RangeType,
+				ProgressName: ch.ProgressName,
+				ChartType:    ChartType(ch.ChartType),
+				BarChartType: BarChartType(ch.BarChartType.String),
+			})
+			currChartID = ch.ChartID
+			if i != 0 {
+				currChartIdx++
+			}
+			chartRes[currChartIdx].ProgressData = append(chartRes[currChartIdx].ProgressData, ProgressData{
+				ProgressID:    ch.ProgressID,
+				RangeValue:    ch.RangeValue,
+				ProgressValue: ch.ProgressValue,
+				ProgressNo:    ch.ProgressNo,
+			})
+
+		} else {
+			chartRes[currChartIdx].ProgressData = append(chartRes[currChartIdx].ProgressData, ProgressData{
+				ProgressID:    ch.ProgressID,
+				RangeValue:    ch.RangeValue,
+				ProgressValue: ch.ProgressValue,
+				ProgressNo:    ch.ProgressNo,
+			})
+		}
+
+	}
+
+	ctx.JSON(http.StatusOK, chartRes)
 }

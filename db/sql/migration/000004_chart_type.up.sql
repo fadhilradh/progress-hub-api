@@ -1,0 +1,2 @@
+ALTER TABLE charts ADD COLUMN chart_type VARCHAR(20) NOT NULL DEFAULT 'area';
+ALTER TABLE charts ADD COLUMN bar_chart_type VARCHAR(20) NULL;
