@@ -63,7 +63,7 @@ func (server *Server) CreateChartWithProgresses(ctx *gin.Context) {
 		RangeType:    db.Range(req.RangeType),
 		ProgressName: req.ProgressName,
 		Colors:       req.ChartColor,
-		ChartType:    string(req.BarChartType),
+		ChartType:    string(req.ChartType),
 		BarChartType: sql.NullString{
 			String: string(req.BarChartType),
 			Valid:  true,
@@ -130,12 +130,12 @@ type GetAccountByIDReq struct {
 	ID uuid.UUID `uri:"id" binding:"required,min=1"`
 }
 
-func (server *Server) GetChartProgressByUserId(ctx *gin.Context) {
-	userID, err := uuid.Parse(ctx.Param("id"))
+func (server *Server) ListChartProgressByUserId(ctx *gin.Context) {
+	userID, err := uuid.Parse(ctx.Param("user_id"))
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 	}
-	charts, err := server.store.GetChartProgressByUserId(ctx, uuid.NullUUID{
+	charts, err := server.store.ListChartProgressByUserId(ctx, uuid.NullUUID{
 		UUID:  userID,
 		Valid: true,
 	})
@@ -186,4 +186,57 @@ func (server *Server) GetChartProgressByUserId(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, chartRes)
+}
+
+type GetChartByIDRes struct {
+	ChartID      uuid.UUID     `json:"chart_id"`
+	ChartColor   string        `json:"chart_color"`
+	ChartType    ChartType     `json:"chart_type"`
+	BarChartType BarChartType  `json:"bar_chart_type"`
+	RangeType    db.Range      `json:"range_type"`
+	ProgressName string        `json:"progress_name"`
+	ProgressData []db.Progress `json:"progress_data"`
+}
+
+func (server *Server) GetChartByID(ctx *gin.Context) {
+	chartID, err := uuid.Parse(ctx.Param("id"))
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	chart, err := server.store.GetChartByID(ctx, chartID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusNotFound, errorResponse(err))
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	progress, err := server.store.GetProgressByChartID(ctx, uuid.NullUUID{
+		UUID:  chart.ID,
+		Valid: true,
+	})
+	if err != nil {
+		if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusNotFound, errorResponse(err))
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	response := GetChartByIDRes{
+		ChartID:      chart.ID,
+		ChartColor:   chart.Colors,
+		ChartType:    ChartType(chart.ChartType),
+		BarChartType: BarChartType(chart.BarChartType.String),
+		RangeType:    chart.RangeType,
+		ProgressName: chart.ProgressName,
+		ProgressData: progress,
+	}
+
+	ctx.JSON(http.StatusOK, response)
 }

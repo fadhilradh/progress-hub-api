@@ -30,8 +30,9 @@ func NewServer(redis *redis.Client, store *db.Store) *Server {
 	// router.BasePath()
 	router.Use(cors.Default())
 	router.GET("/", testFunc)
+	router.GET("/charts/:id", server.GetChartByID)
 	router.POST("/chart-progresses", server.CreateChartWithProgresses)
-	router.GET("/chart-progresses/:id", server.GetChartProgressByUserId)
+	router.GET("/chart-progresses/:user_id", server.ListChartProgressByUserId)
 
 	router.POST("/cache/progress", server.CacheProgress)
 	router.POST("/users", server.createUser)

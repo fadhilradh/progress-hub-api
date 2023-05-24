@@ -67,7 +67,28 @@ func (q *Queries) CreateChart(ctx context.Context, arg CreateChartParams) (Chart
 	return i, err
 }
 
-const getChartProgressByUserId = `-- name: GetChartProgressByUserId :many
+const getChartByID = `-- name: GetChartByID :one
+SELECT id, user_id, created_at, updated_at, range_type, progress_name, colors, chart_type, bar_chart_type FROM charts WHERE id = $1
+`
+
+func (q *Queries) GetChartByID(ctx context.Context, id uuid.UUID) (Chart, error) {
+	row := q.db.QueryRowContext(ctx, getChartByID, id)
+	var i Chart
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.RangeType,
+		&i.ProgressName,
+		&i.Colors,
+		&i.ChartType,
+		&i.BarChartType,
+	)
+	return i, err
+}
+
+const listChartProgressByUserId = `-- name: ListChartProgressByUserId :many
 SELECT c.id as chart_id, c.colors as chart_color, c.chart_type, c.bar_chart_type, p.id as progress_id, c.range_type, p.range_value, c.progress_name, p.progress_value,  
 p.updated_at as progress_updated_at, p.progress_no
 FROM charts c
@@ -76,7 +97,7 @@ WHERE c.user_id = $1
 ORDER BY chart_id DESC
 `
 
-type GetChartProgressByUserIdRow struct {
+type ListChartProgressByUserIdRow struct {
 	ChartID           uuid.UUID      `json:"chart_id"`
 	ChartColor        string         `json:"chart_color"`
 	ChartType         string         `json:"chart_type"`
@@ -90,15 +111,15 @@ type GetChartProgressByUserIdRow struct {
 	ProgressNo        int32          `json:"progress_no"`
 }
 
-func (q *Queries) GetChartProgressByUserId(ctx context.Context, userID uuid.NullUUID) ([]GetChartProgressByUserIdRow, error) {
-	rows, err := q.db.QueryContext(ctx, getChartProgressByUserId, userID)
+func (q *Queries) ListChartProgressByUserId(ctx context.Context, userID uuid.NullUUID) ([]ListChartProgressByUserIdRow, error) {
+	rows, err := q.db.QueryContext(ctx, listChartProgressByUserId, userID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []GetChartProgressByUserIdRow{}
+	items := []ListChartProgressByUserIdRow{}
 	for rows.Next() {
-		var i GetChartProgressByUserIdRow
+		var i ListChartProgressByUserIdRow
 		if err := rows.Scan(
 			&i.ChartID,
 			&i.ChartColor,
