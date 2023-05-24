@@ -136,7 +136,7 @@ type Chart struct {
 type Progress struct {
 	ID            uuid.UUID     `json:"id"`
 	ChartID       uuid.NullUUID `json:"chart_id"`
-	ProgressValue int64         `json:"progress_value"`
+	ProgressValue *int64        `json:"progress_value"`
 	RangeValue    string        `json:"range_value"`
 	CreatedAt     sql.NullTime  `json:"created_at"`
 	UpdatedAt     time.Time     `json:"updated_at"`

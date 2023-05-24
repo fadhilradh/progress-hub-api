@@ -106,7 +106,7 @@ type ListChartProgressByUserIdRow struct {
 	RangeType         Range          `json:"range_type"`
 	RangeValue        string         `json:"range_value"`
 	ProgressName      string         `json:"progress_name"`
-	ProgressValue     int64          `json:"progress_value"`
+	ProgressValue     *int64         `json:"progress_value"`
 	ProgressUpdatedAt time.Time      `json:"progress_updated_at"`
 	ProgressNo        int32          `json:"progress_no"`
 }

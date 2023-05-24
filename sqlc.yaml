@@ -11,5 +11,8 @@ sql:
         emit_json_tags: true
         emit_empty_slices: true
         emit_enum_valid_method: true
-        
-        
+        overrides:
+          - column: progress.progress_value
+            go_type:
+              type: "int64"
+              pointer: true

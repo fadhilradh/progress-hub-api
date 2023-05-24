@@ -31,7 +31,7 @@ VALUES(
 type CreateProgressParams struct {
 	ChartID       uuid.NullUUID `json:"chart_id"`
 	RangeValue    string        `json:"range_value"`
-	ProgressValue int64         `json:"progress_value"`
+	ProgressValue *int64        `json:"progress_value"`
 	ProgressNo    int32         `json:"progress_no"`
 }
 
@@ -42,6 +42,21 @@ func (q *Queries) CreateProgress(ctx context.Context, arg CreateProgressParams) 
 		arg.ProgressValue,
 		arg.ProgressNo,
 	)
+	return err
+}
+
+const editProgressByID = `-- name: EditProgressByID :exec
+UPDATE progress SET range_value = $2, progress_value = COALESCE($3, progress_value), updated_at = now() WHERE id = $1 RETURNING id, chart_id, progress_value, range_value, created_at, updated_at, progress_no
+`
+
+type EditProgressByIDParams struct {
+	ID            uuid.UUID `json:"id"`
+	RangeValue    string    `json:"range_value"`
+	ProgressValue *int64    `json:"progress_value"`
+}
+
+func (q *Queries) EditProgressByID(ctx context.Context, arg EditProgressByIDParams) error {
+	_, err := q.db.ExecContext(ctx, editProgressByID, arg.ID, arg.RangeValue, arg.ProgressValue)
 	return err
 }
 
