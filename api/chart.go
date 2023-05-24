@@ -189,13 +189,13 @@ func (server *Server) ListChartProgressByUserId(ctx *gin.Context) {
 }
 
 type GetChartByIDRes struct {
-	ChartID      uuid.UUID     `json:"chart_id"`
-	ChartColor   string        `json:"chart_color"`
-	ChartType    ChartType     `json:"chart_type"`
-	BarChartType BarChartType  `json:"bar_chart_type"`
-	RangeType    db.Range      `json:"range_type"`
-	ProgressName string        `json:"progress_name"`
-	ProgressData []db.Progress `json:"progress_data"`
+	ChartID      uuid.UUID      `json:"chart_id"`
+	ChartColor   string         `json:"chart_color"`
+	ChartType    ChartType      `json:"chart_type"`
+	BarChartType BarChartType   `json:"bar_chart_type"`
+	RangeType    db.Range       `json:"range_type"`
+	ProgressName string         `json:"progress_name"`
+	ProgressData []ProgressData `json:"progress_data"`
 }
 
 func (server *Server) GetChartByID(ctx *gin.Context) {
@@ -235,7 +235,15 @@ func (server *Server) GetChartByID(ctx *gin.Context) {
 		BarChartType: BarChartType(chart.BarChartType.String),
 		RangeType:    chart.RangeType,
 		ProgressName: chart.ProgressName,
-		ProgressData: progress,
+	}
+
+	for _, prog := range progress {
+		response.ProgressData = append(response.ProgressData, ProgressData{
+			ProgressID:    prog.ID,
+			RangeValue:    prog.RangeValue,
+			ProgressValue: prog.ProgressValue,
+			ProgressNo:    prog.ProgressNo,
+		})
 	}
 
 	ctx.JSON(http.StatusOK, response)
