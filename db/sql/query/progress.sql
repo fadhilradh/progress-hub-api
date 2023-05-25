@@ -18,4 +18,10 @@ VALUES(
 SELECT * FROM progress WHERE chart_id = $1;
 
 -- name: EditProgressByID :exec
-UPDATE progress SET range_value = $2, progress_value = COALESCE($3, progress_value), updated_at = now() WHERE id = $1 RETURNING *;
+UPDATE progress SET 
+range_value = COALESCE($2, range_value), 
+progress_value = COALESCE($3, progress_value), 
+progress_no = COALESCE($4, progress_no), 
+updated_at = now() 
+WHERE id = $1 
+RETURNING *;

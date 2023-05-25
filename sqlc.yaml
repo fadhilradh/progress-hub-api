@@ -16,3 +16,11 @@ sql:
             go_type:
               type: "int64"
               pointer: true
+          - column: progress.range_value
+            go_type:
+              type: "string"
+              pointer: true
+          - column: progress.progress_no
+            go_type:
+              type: "int32"
+              pointer: true

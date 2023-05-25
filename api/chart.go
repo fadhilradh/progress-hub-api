@@ -26,9 +26,9 @@ const (
 )
 
 type Progress struct {
-	RangeValue    string `json:"range_value"`
-	ProgressValue *int64 `json:"progress_value"`
-	ProgressNo    int32  `json:"progress_no"`
+	RangeValue    *string `json:"range_value"`
+	ProgressValue *int64  `json:"progress_value"`
+	ProgressNo    *int32  `json:"progress_no"`
 }
 
 type CreateChartWithProgressesReq struct {
@@ -111,9 +111,9 @@ func (server *Server) CreateChartWithProgresses(ctx *gin.Context) {
 
 type ProgressData struct {
 	ProgressID    uuid.UUID `json:"progress_id"`
-	RangeValue    string    `json:"range_value"`
+	RangeValue    *string   `json:"range_value"`
 	ProgressValue *int64    `json:"progress_value"`
-	ProgressNo    int32     `json:"progress_no"`
+	ProgressNo    *int32    `json:"progress_no"`
 }
 
 type GetChartsByUserIdRes struct {

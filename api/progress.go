@@ -12,7 +12,8 @@ import (
 type ProgressUpdate struct {
 	ProgressID    uuid.UUID `json:"progress_id" binding:"required"`
 	ProgressValue *int64    `json:"progress_value"`
-	RangeValue    string    `json:"range_value"`
+	RangeValue    *string   `json:"range_value"`
+	ProgressNo    *int32    `json:"progress_no"`
 }
 
 type BulkProgressReq struct {
@@ -32,6 +33,7 @@ func (server *Server) BulkUpdateProgress(ctx *gin.Context) {
 			ID:            prog.ProgressID,
 			RangeValue:    prog.RangeValue,
 			ProgressValue: prog.ProgressValue,
+			ProgressNo:    prog.ProgressNo,
 		}
 		if err := server.store.EditProgressByID(ctx, param); err != nil {
 			ctx.JSON(http.StatusInternalServerError, errorResponse(err))

@@ -7,7 +7,6 @@ package db
 
 import (
 	"context"
-	"log"
 
 	"github.com/google/uuid"
 )
@@ -31,9 +30,9 @@ VALUES(
 
 type CreateProgressParams struct {
 	ChartID       uuid.NullUUID `json:"chart_id"`
-	RangeValue    string        `json:"range_value"`
+	RangeValue    *string       `json:"range_value"`
 	ProgressValue *int64        `json:"progress_value"`
-	ProgressNo    int32         `json:"progress_no"`
+	ProgressNo    *int32        `json:"progress_no"`
 }
 
 func (q *Queries) CreateProgress(ctx context.Context, arg CreateProgressParams) error {
@@ -47,17 +46,29 @@ func (q *Queries) CreateProgress(ctx context.Context, arg CreateProgressParams) 
 }
 
 const editProgressByID = `-- name: EditProgressByID :exec
-UPDATE progress SET range_value = $2, progress_value = COALESCE($3, progress_value), updated_at = now() WHERE id = $1 RETURNING id, chart_id, progress_value, range_value, created_at, updated_at, progress_no
+UPDATE progress SET 
+range_value = COALESCE($2, range_value), 
+progress_value = COALESCE($3, progress_value), 
+progress_no = COALESCE($4, progress_no), 
+updated_at = now() 
+WHERE id = $1 
+RETURNING id, chart_id, progress_value, range_value, created_at, updated_at, progress_no
 `
 
 type EditProgressByIDParams struct {
 	ID            uuid.UUID `json:"id"`
-	RangeValue    string    `json:"range_value"`
+	RangeValue    *string   `json:"range_value"`
 	ProgressValue *int64    `json:"progress_value"`
+	ProgressNo    *int32    `json:"progress_no"`
 }
 
 func (q *Queries) EditProgressByID(ctx context.Context, arg EditProgressByIDParams) error {
-	_, err := q.db.ExecContext(ctx, editProgressByID, arg.ID, arg.RangeValue, arg.ProgressValue)
+	_, err := q.db.ExecContext(ctx, editProgressByID,
+		arg.ID,
+		arg.RangeValue,
+		arg.ProgressValue,
+		arg.ProgressNo,
+	)
 	return err
 }
 
@@ -66,17 +77,12 @@ SELECT id, chart_id, progress_value, range_value, created_at, updated_at, progre
 `
 
 func (q *Queries) GetProgressByChartID(ctx context.Context, chartID uuid.NullUUID) ([]Progress, error) {
-	log.Print("before QueryContext")
 	rows, err := q.db.QueryContext(ctx, getProgressByChartID, chartID)
 	if err != nil {
-	log.Print("before error")
-
 		return nil, err
 	}
 	defer rows.Close()
 	items := []Progress{}
-	log.Print("before loop")
-
 	for rows.Next() {
 		var i Progress
 		if err := rows.Scan(
