@@ -8,6 +8,7 @@ package db
 import (
 	"context"
 	"database/sql"
+	"log"
 	"time"
 
 	"github.com/google/uuid"
@@ -72,7 +73,11 @@ SELECT id, user_id, created_at, updated_at, range_type, progress_name, colors, c
 `
 
 func (q *Queries) GetChartByID(ctx context.Context, id uuid.UUID) (Chart, error) {
+	log.Print("before get chartby ID func")
+	log.Print(q.db)
 	row := q.db.QueryRowContext(ctx, getChartByID, id)
+	log.Print("row", row)
+
 	var i Chart
 	err := row.Scan(
 		&i.ID,
@@ -85,6 +90,7 @@ func (q *Queries) GetChartByID(ctx context.Context, id uuid.UUID) (Chart, error)
 		&i.ChartType,
 		&i.BarChartType,
 	)
+	
 	return i, err
 }
 
@@ -106,7 +112,7 @@ type ListChartProgressByUserIdRow struct {
 	RangeType         Range          `json:"range_type"`
 	RangeValue        string         `json:"range_value"`
 	ProgressName      string         `json:"progress_name"`
-	ProgressValue     *int64         `json:"progress_value"`
+	ProgressValue     int64         `json:"progress_value"`
 	ProgressUpdatedAt time.Time      `json:"progress_updated_at"`
 	ProgressNo        int32          `json:"progress_no"`
 }

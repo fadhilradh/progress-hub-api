@@ -7,6 +7,7 @@ package db
 
 import (
 	"context"
+	"log"
 
 	"github.com/google/uuid"
 )
@@ -65,12 +66,17 @@ SELECT id, chart_id, progress_value, range_value, created_at, updated_at, progre
 `
 
 func (q *Queries) GetProgressByChartID(ctx context.Context, chartID uuid.NullUUID) ([]Progress, error) {
+	log.Print("before QueryContext")
 	rows, err := q.db.QueryContext(ctx, getProgressByChartID, chartID)
 	if err != nil {
+	log.Print("before error")
+
 		return nil, err
 	}
 	defer rows.Close()
 	items := []Progress{}
+	log.Print("before loop")
+
 	for rows.Next() {
 		var i Progress
 		if err := rows.Scan(

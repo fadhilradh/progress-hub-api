@@ -27,7 +27,7 @@ const (
 
 type Progress struct {
 	RangeValue    string `json:"range_value"`
-	ProgressValue int64  `json:"progress_value"`
+	ProgressValue *int64 `json:"progress_value"`
 	ProgressNo    int32  `json:"progress_no"`
 }
 
@@ -112,7 +112,7 @@ func (server *Server) CreateChartWithProgresses(ctx *gin.Context) {
 type ProgressData struct {
 	ProgressID    uuid.UUID `json:"progress_id"`
 	RangeValue    string    `json:"range_value"`
-	ProgressValue int64     `json:"progress_value"`
+	ProgressValue *int64    `json:"progress_value"`
 	ProgressNo    int32     `json:"progress_no"`
 }
 
@@ -199,11 +199,13 @@ type GetChartByIDRes struct {
 }
 
 func (server *Server) GetChartByID(ctx *gin.Context) {
+	log.Print("before parse")
 	chartID, err := uuid.Parse(ctx.Param("id"))
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
+	log.Print("before get chartby ID")
 
 	chart, err := server.store.GetChartByID(ctx, chartID)
 	if err != nil {
@@ -214,12 +216,14 @@ func (server *Server) GetChartByID(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
+	log.Print("before get chart")
 
 	progress, err := server.store.GetProgressByChartID(ctx, uuid.NullUUID{
 		UUID:  chart.ID,
 		Valid: true,
 	})
 	if err != nil {
+		log.Print("error")
 		if err == sql.ErrNoRows {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
 			return
@@ -227,6 +231,7 @@ func (server *Server) GetChartByID(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
+	log.Print("before get response")
 
 	response := GetChartByIDRes{
 		ChartID:      chart.ID,
@@ -236,6 +241,7 @@ func (server *Server) GetChartByID(ctx *gin.Context) {
 		RangeType:    chart.RangeType,
 		ProgressName: chart.ProgressName,
 	}
+	log.Print("before loop")
 
 	for _, prog := range progress {
 		response.ProgressData = append(response.ProgressData, ProgressData{
@@ -245,6 +251,7 @@ func (server *Server) GetChartByID(ctx *gin.Context) {
 			ProgressNo:    prog.ProgressNo,
 		})
 	}
+	log.Print("before ctx")
 
 	ctx.JSON(http.StatusOK, response)
 }

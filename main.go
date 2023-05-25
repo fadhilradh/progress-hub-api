@@ -7,7 +7,6 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/redis/go-redis/v9"
 	"progress.me-api/api"
-	reddb "progress.me-api/db/redis"
 	db "progress.me-api/db/sql/sqlc"
 	"progress.me-api/util"
 )
@@ -26,10 +25,11 @@ func main() {
 	conn, err := sql.Open(config.DBDriver, config.DSN)
 	if err != nil {
 		log.Fatal("Can't connect to db:", err)
+		return
 	}
 	store := db.NewStore(conn)
-	rdb := reddb.NewRedis(redisOpt)
-	server := api.NewServer(rdb, store)
+	// rdb := reddb.NewRedis(redisOpt)
+	server := api.NewServer(nil, store)
 
 	err = server.Start(config.ServerAddress)
 
