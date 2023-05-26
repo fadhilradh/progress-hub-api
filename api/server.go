@@ -34,6 +34,8 @@ func NewServer(redis *redis.Client, store *db.Store) *Server {
 	router.GET("/api/v1/charts/:id", server.GetChartByID)
 
 	router.PATCH("/api/v1/progresses", server.BulkUpdateProgress)
+	router.POST("/api/v1/progresses", server.CreateProgress)
+	router.DELETE("/api/v1/progresses/:id", server.DeleteProgressByID)
 
 	router.POST("/api/v1/chart-progresses", server.CreateChartWithProgresses)
 	router.GET("/api/v1/chart-progresses/:user_id", server.ListChartProgressByUserId)

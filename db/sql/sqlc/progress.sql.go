@@ -45,6 +45,15 @@ func (q *Queries) CreateProgress(ctx context.Context, arg CreateProgressParams) 
 	return err
 }
 
+const deleteProgressByID = `-- name: DeleteProgressByID :exec
+DELETE FROM progress WHERE id = $1
+`
+
+func (q *Queries) DeleteProgressByID(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, deleteProgressByID, id)
+	return err
+}
+
 const editProgressByID = `-- name: EditProgressByID :exec
 UPDATE progress SET 
 range_value = COALESCE($2, range_value), 

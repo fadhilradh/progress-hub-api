@@ -25,3 +25,6 @@ progress_no = COALESCE($4, progress_no),
 updated_at = now() 
 WHERE id = $1 
 RETURNING *;
+
+-- name: DeleteProgressByID :exec
+DELETE FROM progress WHERE id = $1;
