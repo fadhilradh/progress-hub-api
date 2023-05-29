@@ -145,3 +145,35 @@ func (q *Queries) ListChartProgressByUserId(ctx context.Context, userID uuid.Nul
 	}
 	return items, nil
 }
+
+const updateChart = `-- name: UpdateChart :exec
+UPDATE charts SET 
+    range_type = COALESCE($2, range_type), 
+    progress_name = COALESCE($3, progress_name),
+    colors = COALESCE($4, colors),
+    chart_type = COALESCE($5, chart_type),
+    bar_chart_type = COALESCE($6, bar_chart_type),
+    updated_at = now()
+WHERE id = $1
+`
+
+type UpdateChartParams struct {
+	ID           uuid.UUID      `json:"id"`
+	RangeType    Range          `json:"range_type"`
+	ProgressName string         `json:"progress_name"`
+	Colors       string         `json:"colors"`
+	ChartType    string         `json:"chart_type"`
+	BarChartType sql.NullString `json:"bar_chart_type"`
+}
+
+func (q *Queries) UpdateChart(ctx context.Context, arg UpdateChartParams) error {
+	_, err := q.db.ExecContext(ctx, updateChart,
+		arg.ID,
+		arg.RangeType,
+		arg.ProgressName,
+		arg.Colors,
+		arg.ChartType,
+		arg.BarChartType,
+	)
+	return err
+}

@@ -1,7 +1,6 @@
 package api
 
 import (
-	"database/sql"
 	"log"
 	"net/http"
 
@@ -66,11 +65,10 @@ func (server *Server) DeleteProgressByID(ctx *gin.Context) {
 }
 
 type CreateProgressReq struct {
-	ChartID       uuid.UUID    `json:"chart_id" binding:"required"`
-	ProgressValue *int64       `json:"progress_value" binding:"required"`
-	RangeValue    *string      `json:"range_value" binding:"required"`
-	ProgressNo    *int32       `json:"progress_no" binding:"required"`
-	CreatedAt     sql.NullTime `json:"created_at" binding:"required"`
+	ChartID       uuid.UUID `json:"chart_id" binding:"required"`
+	ProgressValue *int64    `json:"progress_value" binding:"required"`
+	RangeValue    *string   `json:"range_value" binding:"required"`
+	ProgressNo    *int32    `json:"progress_no" binding:"required"`
 }
 
 func (server *Server) CreateProgress(ctx *gin.Context) {

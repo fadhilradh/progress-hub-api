@@ -29,3 +29,13 @@ INNER JOIN progress p ON c.id = p.chart_id
 WHERE c.user_id = $1
 ORDER BY chart_id DESC
 ;
+
+-- name: UpdateChart :exec
+UPDATE charts SET 
+    range_type = COALESCE($2, range_type), 
+    progress_name = COALESCE($3, progress_name),
+    colors = COALESCE($4, colors),
+    chart_type = COALESCE($5, chart_type),
+    bar_chart_type = COALESCE($6, bar_chart_type),
+    updated_at = now()
+WHERE id = $1;

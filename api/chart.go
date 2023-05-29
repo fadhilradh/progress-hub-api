@@ -248,3 +248,47 @@ func (server *Server) GetChartByID(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, response)
 }
+
+type UpdateChartReq struct {
+	ProgressName string `json:"progress_name"`
+	ChartColor   string `json:"chart_color"`
+	ChartType    string `json:"chart_type"`
+	BarChartType string `json:"bar_chart_type"`
+	RangeType    string `json:"range_type"`
+}
+
+func (server *Server) UpdateChartByID(ctx *gin.Context) {
+	chartID, err := uuid.Parse(ctx.Param("id"))
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	var req UpdateChartReq
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	param := db.UpdateChartParams{
+		ID:           chartID,
+		RangeType:    db.Range(req.RangeType),
+		ProgressName: req.ProgressName,
+		Colors:       req.ChartColor,
+		ChartType:    req.ChartType,
+		BarChartType: sql.NullString{
+			String: req.BarChartType,
+			Valid:  true,
+		},
+	}
+
+	err = server.store.UpdateChart(ctx, param)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "Chart updated successfully",
+	})
+}
