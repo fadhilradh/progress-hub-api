@@ -21,7 +21,7 @@ type CreateUserReq struct {
 	Username string `json:"username"`
 	Email    string `json:"email"`
 	Password string `json:"password"`
-	Role     Role   `json:"role"`
+	Role     string `json:"role"`
 }
 
 func (server *Server) createUser(ctx *gin.Context) {
@@ -40,7 +40,7 @@ func (server *Server) createUser(ctx *gin.Context) {
 			Valid: true,
 		},
 		UpdatedAt: time.Now(),
-		Role:      db.Role(req.Role),
+		Role:      req.Role,
 	}
 
 	user, err := server.store.CreateUser(ctx, data)

@@ -1,0 +1,1 @@
+ALTER TABLE charts ALTER COLUMN range_type SET NOT NULL;

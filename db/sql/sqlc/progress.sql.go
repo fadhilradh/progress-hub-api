@@ -60,8 +60,7 @@ range_value = COALESCE($2, range_value),
 progress_value = COALESCE($3, progress_value), 
 progress_no = COALESCE($4, progress_no), 
 updated_at = now() 
-WHERE id = $1 
-RETURNING id, chart_id, progress_value, range_value, created_at, updated_at, progress_no
+WHERE id = $1
 `
 
 type EditProgressByIDParams struct {

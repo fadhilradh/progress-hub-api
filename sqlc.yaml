@@ -24,3 +24,23 @@ sql:
             go_type:
               type: "int32"
               pointer: true
+          - column: charts.progress_name
+            go_type:
+              type: "string"
+              pointer: true
+          - column: charts.range_type
+            go_type:
+              type: "string"
+              pointer: true
+          - column: charts.colors
+            go_type:
+              type: "string"
+              pointer: true
+          - column: charts.chart_type
+            go_type:
+              type: "string"
+              pointer: true
+          - column: charts.bar_chart_type
+            go_type:
+              type: "string"
+              pointer: true

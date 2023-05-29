@@ -25,14 +25,14 @@ type CreateUserParams struct {
 	Password  string       `json:"password"`
 	CreatedAt sql.NullTime `json:"created_at"`
 	UpdatedAt time.Time    `json:"updated_at"`
-	Role      Role         `json:"role"`
+	Role      string       `json:"role"`
 }
 
 type CreateUserRow struct {
 	ID        uuid.UUID    `json:"id"`
 	Username  string       `json:"username"`
 	Email     string       `json:"email"`
-	Role      Role         `json:"role"`
+	Role      string       `json:"role"`
 	CreatedAt sql.NullTime `json:"created_at"`
 	UpdatedAt time.Time    `json:"updated_at"`
 }

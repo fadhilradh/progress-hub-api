@@ -23,8 +23,7 @@ range_value = COALESCE($2, range_value),
 progress_value = COALESCE($3, progress_value), 
 progress_no = COALESCE($4, progress_no), 
 updated_at = now() 
-WHERE id = $1 
-RETURNING *;
+WHERE id = $1;
 
 -- name: DeleteProgressByID :exec
 DELETE FROM progress WHERE id = $1;

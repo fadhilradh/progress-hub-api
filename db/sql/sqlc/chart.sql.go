@@ -7,7 +7,6 @@ package db
 
 import (
 	"context"
-	"database/sql"
 	"time"
 
 	"github.com/google/uuid"
@@ -35,12 +34,12 @@ VALUES(
 `
 
 type CreateChartParams struct {
-	UserID       uuid.NullUUID  `json:"user_id"`
-	RangeType    Range          `json:"range_type"`
-	ProgressName string         `json:"progress_name"`
-	Colors       string         `json:"colors"`
-	ChartType    string         `json:"chart_type"`
-	BarChartType sql.NullString `json:"bar_chart_type"`
+	UserID       uuid.NullUUID `json:"user_id"`
+	RangeType    *string       `json:"range_type"`
+	ProgressName *string       `json:"progress_name"`
+	Colors       *string       `json:"colors"`
+	ChartType    *string       `json:"chart_type"`
+	BarChartType *string       `json:"bar_chart_type"`
 }
 
 func (q *Queries) CreateChart(ctx context.Context, arg CreateChartParams) (Chart, error) {
@@ -98,17 +97,17 @@ ORDER BY chart_id DESC
 `
 
 type ListChartProgressByUserIdRow struct {
-	ChartID           uuid.UUID      `json:"chart_id"`
-	ChartColor        string         `json:"chart_color"`
-	ChartType         string         `json:"chart_type"`
-	BarChartType      sql.NullString `json:"bar_chart_type"`
-	ProgressID        uuid.UUID      `json:"progress_id"`
-	RangeType         Range          `json:"range_type"`
-	RangeValue        *string        `json:"range_value"`
-	ProgressName      string         `json:"progress_name"`
-	ProgressValue     *int64         `json:"progress_value"`
-	ProgressUpdatedAt time.Time      `json:"progress_updated_at"`
-	ProgressNo        *int32         `json:"progress_no"`
+	ChartID           uuid.UUID `json:"chart_id"`
+	ChartColor        string    `json:"chart_color"`
+	ChartType         *string   `json:"chart_type"`
+	BarChartType      *string   `json:"bar_chart_type"`
+	ProgressID        uuid.UUID `json:"progress_id"`
+	RangeType         *string   `json:"range_type"`
+	RangeValue        *string   `json:"range_value"`
+	ProgressName      *string   `json:"progress_name"`
+	ProgressValue     *int64    `json:"progress_value"`
+	ProgressUpdatedAt time.Time `json:"progress_updated_at"`
+	ProgressNo        *int32    `json:"progress_no"`
 }
 
 func (q *Queries) ListChartProgressByUserId(ctx context.Context, userID uuid.NullUUID) ([]ListChartProgressByUserIdRow, error) {
@@ -158,12 +157,12 @@ WHERE id = $1
 `
 
 type UpdateChartParams struct {
-	ID           uuid.UUID      `json:"id"`
-	RangeType    Range          `json:"range_type"`
-	ProgressName string         `json:"progress_name"`
-	Colors       string         `json:"colors"`
-	ChartType    string         `json:"chart_type"`
-	BarChartType sql.NullString `json:"bar_chart_type"`
+	ID           uuid.UUID `json:"id"`
+	RangeType    *string   `json:"range_type"`
+	ProgressName *string   `json:"progress_name"`
+	Colors       *string   `json:"colors"`
+	ChartType    *string   `json:"chart_type"`
+	BarChartType *string   `json:"bar_chart_type"`
 }
 
 func (q *Queries) UpdateChart(ctx context.Context, arg UpdateChartParams) error {

@@ -33,10 +33,10 @@ type Progress struct {
 
 type CreateChartWithProgressesReq struct {
 	UserId       uuid.UUID    `json:"user_id", binding:"required"`
-	ProgressName string       `json:"progress_name", binding:"required"`
-	RangeType    string       `json:"range_type", binding:"required"`
+	ProgressName *string      `json:"progress_name", binding:"required"`
+	RangeType    *string      `json:"range_type", binding:"required"`
 	ProgressData []Progress   `json:"progress_data", binding:"required"`
-	ChartColor   string       `json:"chart_color", binding:"required"`
+	ChartColor   *string      `json:"chart_color", binding:"required"`
 	ChartType    ChartType    `json:"chart_type", binding:"required"`
 	BarChartType BarChartType `json:"bar_chart_type"`
 }
@@ -60,14 +60,11 @@ func (server *Server) CreateChartWithProgresses(ctx *gin.Context) {
 			UUID:  req.UserId,
 			Valid: true,
 		},
-		RangeType:    db.Range(req.RangeType),
+		RangeType:    req.RangeType,
 		ProgressName: req.ProgressName,
 		Colors:       req.ChartColor,
-		ChartType:    string(req.ChartType),
-		BarChartType: sql.NullString{
-			String: string(req.BarChartType),
-			Valid:  true,
-		},
+		ChartType:    (*string)(&req.ChartType),
+		BarChartType: (*string)(&req.BarChartType),
 	}
 	chart, err := server.store.CreateChart(ctx, chartData)
 	if err != nil {
@@ -118,11 +115,11 @@ type ProgressData struct {
 
 type GetChartsByUserIdRes struct {
 	ChartID      uuid.UUID      `json:"chart_id"`
-	ChartColor   string         `json:"chart_color"`
+	ChartColor   *string        `json:"chart_color"`
 	ChartType    ChartType      `json:"chart_type"`
 	BarChartType BarChartType   `json:"bar_chart_type"`
-	RangeType    db.Range       `json:"range_type"`
-	ProgressName string         `json:"progress_name"`
+	RangeType    *string        `json:"range_type"`
+	ProgressName *string        `json:"progress_name"`
 	ProgressData []ProgressData `json:"progress_data"`
 }
 
@@ -157,11 +154,11 @@ func (server *Server) ListChartProgressByUserId(ctx *gin.Context) {
 		if i == 0 || ch.ChartID != currChartID {
 			chartRes = append(chartRes, GetChartsByUserIdRes{
 				ChartID:      ch.ChartID,
-				ChartColor:   ch.ChartColor,
+				ChartColor:   &ch.ChartColor,
 				RangeType:    ch.RangeType,
 				ProgressName: ch.ProgressName,
-				ChartType:    ChartType(ch.ChartType),
-				BarChartType: BarChartType(ch.BarChartType.String),
+				ChartType:    ChartType(*ch.ChartType),
+				BarChartType: BarChartType(*ch.BarChartType),
 			})
 			currChartID = ch.ChartID
 			if i != 0 {
@@ -190,11 +187,11 @@ func (server *Server) ListChartProgressByUserId(ctx *gin.Context) {
 
 type GetChartByIDRes struct {
 	ChartID      uuid.UUID      `json:"chart_id"`
-	ChartColor   string         `json:"chart_color"`
+	ChartColor   *string        `json:"chart_color"`
 	ChartType    ChartType      `json:"chart_type"`
 	BarChartType BarChartType   `json:"bar_chart_type"`
-	RangeType    db.Range       `json:"range_type"`
-	ProgressName string         `json:"progress_name"`
+	RangeType    *string        `json:"range_type"`
+	ProgressName *string        `json:"progress_name"`
 	ProgressData []ProgressData `json:"progress_data"`
 }
 
@@ -231,8 +228,8 @@ func (server *Server) GetChartByID(ctx *gin.Context) {
 	response := GetChartByIDRes{
 		ChartID:      chart.ID,
 		ChartColor:   chart.Colors,
-		ChartType:    ChartType(chart.ChartType),
-		BarChartType: BarChartType(chart.BarChartType.String),
+		ChartType:    ChartType(*chart.ChartType),
+		BarChartType: BarChartType(*chart.BarChartType),
 		RangeType:    chart.RangeType,
 		ProgressName: chart.ProgressName,
 	}
@@ -250,11 +247,11 @@ func (server *Server) GetChartByID(ctx *gin.Context) {
 }
 
 type UpdateChartReq struct {
-	ProgressName string `json:"progress_name"`
-	ChartColor   string `json:"chart_color"`
-	ChartType    string `json:"chart_type"`
-	BarChartType string `json:"bar_chart_type"`
-	RangeType    string `json:"range_type"`
+	ProgressName *string `json:"progress_name"`
+	ChartColor   *string `json:"chart_color"`
+	ChartType    *string `json:"chart_type"`
+	BarChartType *string `json:"bar_chart_type"`
+	RangeType    *string `json:"range_type"`
 }
 
 func (server *Server) UpdateChartByID(ctx *gin.Context) {
@@ -272,14 +269,11 @@ func (server *Server) UpdateChartByID(ctx *gin.Context) {
 
 	param := db.UpdateChartParams{
 		ID:           chartID,
-		RangeType:    db.Range(req.RangeType),
+		RangeType:    req.RangeType,
 		ProgressName: req.ProgressName,
 		Colors:       req.ChartColor,
 		ChartType:    req.ChartType,
-		BarChartType: sql.NullString{
-			String: req.BarChartType,
-			Valid:  true,
-		},
+		BarChartType: req.BarChartType,
 	}
 
 	err = server.store.UpdateChart(ctx, param)

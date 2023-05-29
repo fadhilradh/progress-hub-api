@@ -6,131 +6,21 @@ package db
 
 import (
 	"database/sql"
-	"database/sql/driver"
-	"fmt"
 	"time"
 
 	"github.com/google/uuid"
 )
 
-type Range string
-
-const (
-	RangeDaily   Range = "daily"
-	RangeWeekly  Range = "weekly"
-	RangeMonthly Range = "monthly"
-	RangeYearly  Range = "yearly"
-)
-
-func (e *Range) Scan(src interface{}) error {
-	switch s := src.(type) {
-	case []byte:
-		*e = Range(s)
-	case string:
-		*e = Range(s)
-	default:
-		return fmt.Errorf("unsupported scan type for Range: %T", src)
-	}
-	return nil
-}
-
-type NullRange struct {
-	Range Range
-	Valid bool // Valid is true if Range is not NULL
-}
-
-// Scan implements the Scanner interface.
-func (ns *NullRange) Scan(value interface{}) error {
-	if value == nil {
-		ns.Range, ns.Valid = "", false
-		return nil
-	}
-	ns.Valid = true
-	return ns.Range.Scan(value)
-}
-
-// Value implements the driver Valuer interface.
-func (ns NullRange) Value() (driver.Value, error) {
-	if !ns.Valid {
-		return nil, nil
-	}
-	return string(ns.Range), nil
-}
-
-func (e Range) Valid() bool {
-	switch e {
-	case RangeDaily,
-		RangeWeekly,
-		RangeMonthly,
-		RangeYearly:
-		return true
-	}
-	return false
-}
-
-type Role string
-
-const (
-	RoleUser       Role = "user"
-	RoleAdmin      Role = "admin"
-	RoleSuperadmin Role = "superadmin"
-)
-
-func (e *Role) Scan(src interface{}) error {
-	switch s := src.(type) {
-	case []byte:
-		*e = Role(s)
-	case string:
-		*e = Role(s)
-	default:
-		return fmt.Errorf("unsupported scan type for Role: %T", src)
-	}
-	return nil
-}
-
-type NullRole struct {
-	Role  Role
-	Valid bool // Valid is true if Role is not NULL
-}
-
-// Scan implements the Scanner interface.
-func (ns *NullRole) Scan(value interface{}) error {
-	if value == nil {
-		ns.Role, ns.Valid = "", false
-		return nil
-	}
-	ns.Valid = true
-	return ns.Role.Scan(value)
-}
-
-// Value implements the driver Valuer interface.
-func (ns NullRole) Value() (driver.Value, error) {
-	if !ns.Valid {
-		return nil, nil
-	}
-	return string(ns.Role), nil
-}
-
-func (e Role) Valid() bool {
-	switch e {
-	case RoleUser,
-		RoleAdmin,
-		RoleSuperadmin:
-		return true
-	}
-	return false
-}
-
 type Chart struct {
-	ID           uuid.UUID      `json:"id"`
-	UserID       uuid.NullUUID  `json:"user_id"`
-	CreatedAt    sql.NullTime   `json:"created_at"`
-	UpdatedAt    time.Time      `json:"updated_at"`
-	RangeType    Range          `json:"range_type"`
-	ProgressName string         `json:"progress_name"`
-	Colors       string         `json:"colors"`
-	ChartType    string         `json:"chart_type"`
-	BarChartType sql.NullString `json:"bar_chart_type"`
+	ID           uuid.UUID     `json:"id"`
+	UserID       uuid.NullUUID `json:"user_id"`
+	CreatedAt    sql.NullTime  `json:"created_at"`
+	UpdatedAt    time.Time     `json:"updated_at"`
+	RangeType    *string       `json:"range_type"`
+	ProgressName *string       `json:"progress_name"`
+	Colors       *string       `json:"colors"`
+	ChartType    *string       `json:"chart_type"`
+	BarChartType *string       `json:"bar_chart_type"`
 }
 
 type Progress struct {
@@ -150,6 +40,6 @@ type User struct {
 	Password        string         `json:"password"`
 	CreatedAt       sql.NullTime   `json:"created_at"`
 	UpdatedAt       time.Time      `json:"updated_at"`
-	Role            Role           `json:"role"`
+	Role            string         `json:"role"`
 	PhotoProfileUrl sql.NullString `json:"photo_profile_url"`
 }

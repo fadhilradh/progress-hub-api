@@ -14,7 +14,7 @@ CREATE TYPE "role" AS ENUM (
 CREATE TABLE IF NOT EXISTS "progress" (
   "id" uuid PRIMARY KEY DEFAULT (uuid_generate_v4()),
   "chart_id" uuid,
-  "progress_value" bigint NOT NULL,
+  "progress_value" bigint NOT NULL ,
   "range_value" text NOT NULL,
   "created_at" timestamptz,
   "updated_at" timestamptz NOT NULL DEFAULT (now())
