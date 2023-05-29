@@ -262,6 +262,7 @@ func (server *Server) UpdateChartByID(ctx *gin.Context) {
 	}
 
 	var req UpdateChartReq
+	log.Print("req", req)
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
@@ -276,8 +277,9 @@ func (server *Server) UpdateChartByID(ctx *gin.Context) {
 		BarChartType: req.BarChartType,
 	}
 
-	err = server.store.UpdateChart(ctx, param)
-	if err != nil {
+	log.Print("param", param)
+
+	if err := server.store.UpdateChart(ctx, param); err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
