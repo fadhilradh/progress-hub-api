@@ -2,10 +2,10 @@ createdb:
 	docker exec -it postgres-13 createdb  --username=skygazer --owner=skygazer progressme
 
 migrateup:
-	migrate -path db/sql/migration -database "postgresql://skygazer:hamdalah@localhost:5232/progressme?sslmode=disable" -verbose up
+	./migrate -path db/sql/migration -database "postgresql://skygazer:hamdalah@localhost:5232/progressme?sslmode=disable" -verbose up
 
 migratedown:
-	migrate -path db/sql/migration -database "postgresql://skygazer:hamdalah@localhost:5232/progressme?sslmode=disable" -verbose down
+	./migrate -path db/sql/migration -database "postgresql://skygazer:hamdalah@localhost:5232/progressme?sslmode=disable" -verbose down
 
 makeFileDir := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
