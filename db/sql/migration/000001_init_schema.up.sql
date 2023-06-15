@@ -11,6 +11,8 @@ CREATE TYPE "role" AS ENUM (
   'superadmin'
 );
 
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
 CREATE TABLE IF NOT EXISTS "progress" (
   "id" uuid PRIMARY KEY DEFAULT (uuid_generate_v4()),
   "chart_id" uuid,
