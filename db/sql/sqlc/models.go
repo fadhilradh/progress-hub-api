@@ -12,15 +12,15 @@ import (
 )
 
 type Chart struct {
-	ID           uuid.UUID     `json:"id"`
-	UserID       uuid.NullUUID `json:"user_id"`
-	CreatedAt    sql.NullTime  `json:"created_at"`
-	UpdatedAt    time.Time     `json:"updated_at"`
-	RangeType    *string       `json:"range_type"`
-	ProgressName *string       `json:"progress_name"`
-	Colors       *string       `json:"colors"`
-	ChartType    *string       `json:"chart_type"`
-	BarChartType *string       `json:"bar_chart_type"`
+	ID           uuid.UUID    `json:"id"`
+	UserID       string       `json:"user_id"`
+	CreatedAt    sql.NullTime `json:"created_at"`
+	UpdatedAt    time.Time    `json:"updated_at"`
+	RangeType    *string      `json:"range_type"`
+	ProgressName *string      `json:"progress_name"`
+	Colors       *string      `json:"colors"`
+	ChartType    *string      `json:"chart_type"`
+	BarChartType *string      `json:"bar_chart_type"`
 }
 
 type Progress struct {
@@ -34,7 +34,7 @@ type Progress struct {
 }
 
 type User struct {
-	ID              uuid.UUID      `json:"id"`
+	ID              string         `json:"id"`
 	Username        string         `json:"username"`
 	Email           string         `json:"email"`
 	Password        string         `json:"password"`

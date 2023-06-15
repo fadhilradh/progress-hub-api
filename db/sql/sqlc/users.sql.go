@@ -9,8 +9,6 @@ import (
 	"context"
 	"database/sql"
 	"time"
-
-	"github.com/google/uuid"
 )
 
 const createUser = `-- name: CreateUser :one
@@ -29,7 +27,7 @@ type CreateUserParams struct {
 }
 
 type CreateUserRow struct {
-	ID        uuid.UUID    `json:"id"`
+	ID        string       `json:"id"`
 	Username  string       `json:"username"`
 	Email     string       `json:"email"`
 	Role      string       `json:"role"`
