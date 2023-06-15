@@ -1,18 +1,3 @@
-CREATE TYPE "range" AS ENUM (
-  'daily',
-  'weekly',
-  'monthly',
-  'yearly'
-);
-
-CREATE TYPE "role" AS ENUM (
-  'user',
-  'admin',
-  'superadmin'
-);
-
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-
 CREATE TABLE IF NOT EXISTS "progress" (
   "id" uuid PRIMARY KEY DEFAULT (uuid_generate_v4()),
   "chart_id" uuid,
@@ -24,21 +9,21 @@ CREATE TABLE IF NOT EXISTS "progress" (
 
 CREATE TABLE IF NOT EXISTS "charts" (
   "id" uuid PRIMARY KEY DEFAULT (uuid_generate_v4()),
-  "user_id" uuid,
+  "user_id" TEXT NOT NULL,
   "created_at" timestamptz,
   "updated_at" timestamptz NOT NULL DEFAULT (now()),
-  "range_type" range NOT NULL,
+  "range_type" text NOT NULL,
   "progress_name" text NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS "users" (
-  "id" uuid PRIMARY KEY DEFAULT (uuid_generate_v4()),
+  "id" TEXT PRIMARY KEY NOT NULL,
   "username" text UNIQUE NOT NULL,
   "email" text UNIQUE NOT NULL,
   "password" text NOT NULL,
   "created_at" timestamptz,
   "updated_at" timestamptz NOT NULL DEFAULT (now()),
-  "role" role NOT NULL,
+  "role" text NOT NULL,
   "photo_profile_url" text
 );
 
