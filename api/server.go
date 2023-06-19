@@ -42,7 +42,9 @@ func NewServer(redis *redis.Client, store *db.Store) *Server {
 	router.GET("/api/v1/chart-progresses/:user_id", server.ListChartProgressByUserId)
 
 	router.POST("/api/v1/cache/progress", server.CacheProgress)
+
 	router.POST("/api/v1/users", server.createUser)
+	router.POST("/api/v1/users/:id", server.addUserFromClerk)
 
 	router.POST("/api/v1/login", server.LoginUser)
 
