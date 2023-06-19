@@ -32,18 +32,42 @@ func (server *Server) createUser(ctx *gin.Context) {
 	}
 
 	data := db.CreateUserParams{
-		Username: req.Username,
-		Password: req.Password, // encrypt this !
-		Email:    req.Email,
+		Username: sql.NullString{
+			String: req.Username,
+			Valid:  true,
+		},
+		Password: sql.NullString{
+			String: req.Password,
+			Valid:  true,
+		}, // encrypt this !
+		Email: sql.NullString{
+			String: req.Email,
+			Valid:  true,
+		},
 		CreatedAt: sql.NullTime{
 			Time:  time.Now(),
 			Valid: true,
 		},
 		UpdatedAt: time.Now(),
-		Role:      req.Role,
+		Role: sql.NullString{
+			String: req.Role,
+			Valid:  true,
+		},
 	}
 
 	user, err := server.store.CreateUser(ctx, data)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, user)
+}
+
+func (server *Server) addUserFromClerk(ctx *gin.Context) {
+	id := ctx.Param("id")
+
+	user, err := server.store.AddClerkUser(ctx, id)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return

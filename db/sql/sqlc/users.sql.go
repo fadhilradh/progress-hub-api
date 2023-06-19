@@ -11,6 +11,25 @@ import (
 	"time"
 )
 
+const addClerkUser = `-- name: AddClerkUser :one
+INSERT INTO users(id, created_at) 
+VALUES($1, now())
+RETURNING id, created_at, updated_at
+`
+
+type AddClerkUserRow struct {
+	ID        string       `json:"id"`
+	CreatedAt sql.NullTime `json:"created_at"`
+	UpdatedAt time.Time    `json:"updated_at"`
+}
+
+func (q *Queries) AddClerkUser(ctx context.Context, id string) (AddClerkUserRow, error) {
+	row := q.db.QueryRowContext(ctx, addClerkUser, id)
+	var i AddClerkUserRow
+	err := row.Scan(&i.ID, &i.CreatedAt, &i.UpdatedAt)
+	return i, err
+}
+
 const createUser = `-- name: CreateUser :one
 INSERT INTO users(username, email, password, created_at, updated_at, role)
 VALUES($1, $2, $3, $4, $5, $6)
@@ -18,21 +37,21 @@ RETURNING id, username, email, role, created_at, updated_at
 `
 
 type CreateUserParams struct {
-	Username  string       `json:"username"`
-	Email     string       `json:"email"`
-	Password  string       `json:"password"`
-	CreatedAt sql.NullTime `json:"created_at"`
-	UpdatedAt time.Time    `json:"updated_at"`
-	Role      string       `json:"role"`
+	Username  sql.NullString `json:"username"`
+	Email     sql.NullString `json:"email"`
+	Password  sql.NullString `json:"password"`
+	CreatedAt sql.NullTime   `json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
+	Role      sql.NullString `json:"role"`
 }
 
 type CreateUserRow struct {
-	ID        string       `json:"id"`
-	Username  string       `json:"username"`
-	Email     string       `json:"email"`
-	Role      string       `json:"role"`
-	CreatedAt sql.NullTime `json:"created_at"`
-	UpdatedAt time.Time    `json:"updated_at"`
+	ID        string         `json:"id"`
+	Username  sql.NullString `json:"username"`
+	Email     sql.NullString `json:"email"`
+	Role      sql.NullString `json:"role"`
+	CreatedAt sql.NullTime   `json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (CreateUserRow, error) {
@@ -60,7 +79,7 @@ const getUserByUsername = `-- name: GetUserByUsername :one
 SELECT id, username, email, password, created_at, updated_at, role, photo_profile_url FROM users WHERE username = $1
 `
 
-func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User, error) {
+func (q *Queries) GetUserByUsername(ctx context.Context, username sql.NullString) (User, error) {
 	row := q.db.QueryRowContext(ctx, getUserByUsername, username)
 	var i User
 	err := row.Scan(

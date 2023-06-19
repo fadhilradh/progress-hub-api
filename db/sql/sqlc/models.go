@@ -35,11 +35,11 @@ type Progress struct {
 
 type User struct {
 	ID              string         `json:"id"`
-	Username        string         `json:"username"`
-	Email           string         `json:"email"`
-	Password        string         `json:"password"`
+	Username        sql.NullString `json:"username"`
+	Email           sql.NullString `json:"email"`
+	Password        sql.NullString `json:"password"`
 	CreatedAt       sql.NullTime   `json:"created_at"`
 	UpdatedAt       time.Time      `json:"updated_at"`
-	Role            string         `json:"role"`
+	Role            sql.NullString `json:"role"`
 	PhotoProfileUrl sql.NullString `json:"photo_profile_url"`
 }
