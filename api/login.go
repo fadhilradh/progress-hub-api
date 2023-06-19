@@ -1,6 +1,7 @@
 package api
 
 import (
+	"database/sql"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -18,13 +19,16 @@ func (server *Server) LoginUser(ctx *gin.Context) {
 		return
 	}
 
-	user, err := server.store.GetUserByUsername(ctx, req.Username)
+	user, err := server.store.GetUserByUsername(ctx, sql.NullString{
+		String: req.Username,
+		Valid:  true,
+	})
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 
-	if user.Password != req.Password {
+	if user.Password.String != req.Password {
 		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
 		return
 	}
