@@ -46,3 +46,4 @@ volumes:
   redis:
 networks:
   progressme-network:
+    driver: bridge
