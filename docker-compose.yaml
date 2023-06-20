@@ -41,6 +41,10 @@ services:
     networks:
       - progressme-network
 
+  debug:
+    image: postgres:13
+    command: sleep 1d
+
 volumes:
   postgres:
   redis:
