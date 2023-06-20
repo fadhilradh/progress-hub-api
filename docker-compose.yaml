@@ -1,13 +1,15 @@
 version: "3.3"
 services:
-  nginx:
-    image: nginx:1.22
+  go-server:
+    image: fadhilradh/progressme-api
+    container_name: progressme-api
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
-      - "81:80"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
+      - 8081:8081
     networks:
-      - progressme-network
+      - progressme
   cache:
     container_name: redis
     image: redis:7-alpine
@@ -36,24 +38,10 @@ services:
       - postgres:/data/postgres
     networks:
       - progressme-network
-  pgadmin:
-    container_name: pgadmin4
-    image: dpage/pgadmin4
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
-      PGADMIN_CONFIG_SERVER_MODE: "False"
-    volumes:
-      - pgadmin:/var/lib/pgadmin
-    ports:
-      - "5050:80"
-    networks:
-      - progressme-network
-    restart: unless-stopped
+
 volumes:
   postgres:
   redis:
-  pgadmin:
 networks:
   progressme-network:
     driver: bridge
