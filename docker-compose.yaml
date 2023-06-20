@@ -9,7 +9,7 @@ services:
     ports:
       - 8081:8081
     networks:
-      - progressme
+      - progressme-network
   cache:
     container_name: redis
     image: redis:7-alpine
