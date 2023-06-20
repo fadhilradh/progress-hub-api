@@ -32,6 +32,8 @@ services:
       - PGDATA=/data/postgres
     ports:
       - "5232:5432"
+    expose:
+      - 5232
     volumes:
       - postgres:/data/postgres
     networks:
