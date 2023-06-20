@@ -42,7 +42,7 @@ services:
       - progressme-network
 
   debug:
-    image: postgres:13
+    image: fadhilradh/progressme-api
     command: sleep 1d
 
 volumes:
