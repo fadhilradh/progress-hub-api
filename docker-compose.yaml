@@ -31,7 +31,10 @@ services:
       - POSTGRES_DB=progressme
       - PGDATA=/data/postgres
     ports:
-      - 5232:5432
+      - "5232:5432"
+      - "5432:5432"
+    expose:
+      - 5232
     volumes:
       - postgres:/data/postgres
     networks:
@@ -42,4 +45,3 @@ volumes:
   redis:
 networks:
   progressme-network:
-    driver: bridge
