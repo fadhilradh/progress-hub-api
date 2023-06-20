@@ -10,6 +10,9 @@ services:
       - 8081:8081
     networks:
       - progressme-network
+    restart: always
+    depends_on:
+      - postgres
   cache:
     container_name: redis
     image: redis:7-alpine
@@ -21,6 +24,7 @@ services:
       - redis:/data
     networks:
       - progressme-network
+
   postgres:
     container_name: postgres-13
     image: postgres:13
@@ -35,6 +39,7 @@ services:
       - "5432:5432"
     expose:
       - 5232
+    restart: always
     volumes:
       - postgres:/data/postgres
     networks:
