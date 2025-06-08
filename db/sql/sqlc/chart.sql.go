@@ -34,12 +34,12 @@ VALUES(
 `
 
 type CreateChartParams struct {
-	UserID       uuid.NullUUID `json:"user_id"`
-	RangeType    *string       `json:"range_type"`
-	ProgressName *string       `json:"progress_name"`
-	Colors       *string       `json:"colors"`
-	ChartType    *string       `json:"chart_type"`
-	BarChartType *string       `json:"bar_chart_type"`
+	UserID       *string `json:"user_id"`
+	RangeType    *string `json:"range_type"`
+	ProgressName *string `json:"progress_name"`
+	Colors       *string `json:"colors"`
+	ChartType    *string `json:"chart_type"`
+	BarChartType *string `json:"bar_chart_type"`
 }
 
 func (q *Queries) CreateChart(ctx context.Context, arg CreateChartParams) (Chart, error) {
@@ -110,7 +110,7 @@ type ListChartProgressByUserIdRow struct {
 	ProgressNo        *int32    `json:"progress_no"`
 }
 
-func (q *Queries) ListChartProgressByUserId(ctx context.Context, userID uuid.NullUUID) ([]ListChartProgressByUserIdRow, error) {
+func (q *Queries) ListChartProgressByUserId(ctx context.Context, userID *string) ([]ListChartProgressByUserIdRow, error) {
 	rows, err := q.db.QueryContext(ctx, listChartProgressByUserId, userID)
 	if err != nil {
 		return nil, err

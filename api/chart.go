@@ -32,7 +32,7 @@ type Progress struct {
 }
 
 type CreateChartWithProgressesReq struct {
-	UserId       uuid.UUID    `json:"user_id", binding:"required"`
+	UserId       *string    `json:"user_id", binding:"required"`
 	ProgressName *string      `json:"progress_name", binding:"required"`
 	RangeType    *string      `json:"range_type", binding:"required"`
 	ProgressData []Progress   `json:"progress_data", binding:"required"`
@@ -43,7 +43,7 @@ type CreateChartWithProgressesReq struct {
 
 type CreateChartWithProgressesRes struct {
 	ChartID      uuid.UUID     `json:"chart_id"`
-	UserID       uuid.UUID     `json:"user_id"`
+	UserID       string     `json:"user_id"`
 	ProgressData []db.Progress `json:"progress_data"`
 }
 
@@ -56,10 +56,7 @@ func (server *Server) CreateChartWithProgresses(ctx *gin.Context) {
 
 	// insert into chart table
 	chartData := db.CreateChartParams{
-		UserID: uuid.NullUUID{
-			UUID:  req.UserId,
-			Valid: true,
-		},
+		UserID: req.UserId,
 		RangeType:    req.RangeType,
 		ProgressName: req.ProgressName,
 		Colors:       req.ChartColor,
@@ -101,7 +98,7 @@ func (server *Server) CreateChartWithProgresses(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, CreateChartWithProgressesRes{
 		ChartID:      chart.ID,
-		UserID:       chart.UserID.UUID,
+		UserID:       *chart.UserID,
 		ProgressData: progresses,
 	})
 }
@@ -128,14 +125,8 @@ type GetAccountByIDReq struct {
 }
 
 func (server *Server) ListChartProgressByUserId(ctx *gin.Context) {
-	userID, err := uuid.Parse(ctx.Param("user_id"))
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
-	}
-	charts, err := server.store.ListChartProgressByUserId(ctx, uuid.NullUUID{
-		UUID:  userID,
-		Valid: true,
-	})
+	userID := (ctx.Param("user_id"))
+	charts, err := server.store.ListChartProgressByUserId(ctx, &userID)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))

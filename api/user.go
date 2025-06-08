@@ -18,6 +18,7 @@ const (
 )
 
 type CreateUserReq struct {
+	ID string `json:id`
 	Username string `json:"username"`
 	Email    string `json:"email"`
 	Password string `json:"password"`
@@ -32,6 +33,7 @@ func (server *Server) createUser(ctx *gin.Context) {
 	}
 
 	data := db.CreateUserParams{
+		ID: req.ID,
 		Username: req.Username,
 		Password: req.Password, // encrypt this !
 		Email:    req.Email,
@@ -41,6 +43,7 @@ func (server *Server) createUser(ctx *gin.Context) {
 		},
 		UpdatedAt: time.Now(),
 		Role:      req.Role,
+		
 	}
 
 	user, err := server.store.CreateUser(ctx, data)
