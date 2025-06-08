@@ -154,7 +154,7 @@ func (server *Server) ListChartProgressByUserId(ctx *gin.Context) {
 		if i == 0 || ch.ChartID != currChartID {
 			chartRes = append(chartRes, GetChartsByUserIdRes{
 				ChartID:      ch.ChartID,
-				ChartColor:   &ch.ChartColor,
+				ChartColor:   ch.ChartColor,
 				RangeType:    ch.RangeType,
 				ProgressName: ch.ProgressName,
 				ChartType:    ChartType(*ch.ChartType),
